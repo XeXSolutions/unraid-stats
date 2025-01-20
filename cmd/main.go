@@ -62,173 +62,68 @@ type SystemStats struct {
 
 func readUnraidConfig() (*ArrayStatus, []DiskInfo, error) {
 	arrayStatus := &ArrayStatus{
-		State: "Unknown",
+		State:      "Started", // Default to started since we can read the disks
+		Protection: "Protected",
 	}
 
-	// Read array status from mdstat
-	mdstatPath := "/host/var/run/mdstat"
-	if _, err := os.Stat(mdstatPath); os.IsNotExist(err) {
-		log.Printf("mdstat not found at %s, trying fallback path", mdstatPath)
-		mdstatPath = "/var/run/mdstat" // Fallback for testing
-	}
-
-	mdstatData, err := ioutil.ReadFile(mdstatPath)
-	if err != nil {
-		log.Printf("Warning: Could not read mdstat: %v", err)
-	} else {
-		mdstatContent := string(mdstatData)
-		if strings.Contains(mdstatContent, "active") {
-			arrayStatus.State = "Started"
-			arrayStatus.Protection = "Protected"
-		} else if strings.Contains(mdstatContent, "inactive") {
-			arrayStatus.State = "Stopped"
-			arrayStatus.Protection = "Not Protected"
-		}
-	}
-
-	// Read disks.ini for disk information
 	var diskInfos []DiskInfo
 
-	// Try different possible paths for disks.ini
-	possiblePaths := []string{
-		"/host/var/local/emhttp/disks.ini",
-		"/var/local/emhttp/disks.ini",
-		"/etc/unraid/disks.ini",
+	// Read array disks
+	diskPaths := []struct {
+		path string
+		typ  string
+	}{
+		{"/host/mnt/disk1", "data"},
+		{"/host/mnt/disk2", "data"},
+		{"/host/mnt/disk3", "data"},
+		{"/host/mnt/disk4", "data"},
+		{"/host/mnt/disk5", "data"},
+		{"/host/mnt/disk6", "data"},
+		{"/host/mnt/disk7", "data"},
+		{"/host/mnt/disk8", "data"},
+		{"/host/mnt/cache", "cache"},
+		{"/host/mnt/user", "user"},
 	}
 
-	var disksIniData []byte
-	var disksIniPath string
-	var readErr error
-
-	for _, path := range possiblePaths {
-		log.Printf("Trying to read disks.ini from: %s", path)
-		if _, err := os.Stat(path); err == nil {
-			// File exists, try to read it
-			disksIniData, readErr = ioutil.ReadFile(path)
-			if readErr == nil {
-				disksIniPath = path
-				log.Printf("Successfully read disks.ini from: %s", path)
-				break
-			}
-			log.Printf("Error reading %s: %v", path, readErr)
-		} else {
-			log.Printf("File not found at %s: %v", path, err)
-		}
-	}
-
-	if disksIniPath == "" {
-		log.Printf("Warning: Could not find disks.ini in any of the expected locations")
-		// Try to list the contents of the directories to debug
-		for _, dir := range []string{"/host/var/local/emhttp", "/var/local/emhttp", "/etc/unraid"} {
-			if files, err := ioutil.ReadDir(dir); err == nil {
-				log.Printf("Contents of %s:", dir)
-				for _, f := range files {
-					log.Printf("  %s (size: %d, mode: %s)", f.Name(), f.Size(), f.Mode())
-				}
-			} else {
-				log.Printf("Could not read directory %s: %v", dir, err)
-			}
-		}
-		return arrayStatus, diskInfos, fmt.Errorf("could not find disks.ini")
-	}
-
-	// Parse disks.ini content
-	lines := strings.Split(string(disksIniData), "\n")
-	var currentDisk string
-	diskMap := make(map[string]map[string]string)
-
-	for _, line := range lines {
-		line = strings.TrimSpace(line)
-		if line == "" {
-			continue
-		}
-
-		if strings.HasPrefix(line, "[") && strings.HasSuffix(line, "]") {
-			currentDisk = strings.Trim(line, "[]")
-			diskMap[currentDisk] = make(map[string]string)
-		} else if currentDisk != "" && strings.Contains(line, "=") {
-			parts := strings.SplitN(line, "=", 2)
-			if len(parts) == 2 {
-				key := strings.TrimSpace(parts[0])
-				value := strings.TrimSpace(parts[1])
-				diskMap[currentDisk][key] = value
-			}
-		}
-	}
-
-	// Process disk information
-	for diskName, diskData := range diskMap {
-		if diskName == "parity" || diskName == "parity2" {
-			continue // Skip parity disks for now as they're handled differently
-		}
-
-		diskType := "data"
-		if strings.HasPrefix(diskName, "cache") {
-			diskType = "cache"
-		}
-
-		devicePath := diskData["device"]
-		if devicePath == "" {
-			log.Printf("No device path found for disk: %s", diskName)
-			continue
-		}
-
-		// Get disk usage information
-		usage, err := disk.Usage(devicePath)
-		if err != nil {
-			log.Printf("Warning: Could not get disk usage for %s (%s): %v", diskName, devicePath, err)
-			continue
-		}
-
-		diskInfo := DiskInfo{
-			Path:        devicePath,
-			Name:        diskName,
-			Total:       usage.Total,
-			Used:        usage.Used,
-			Free:        usage.Free,
-			UsedPercent: usage.UsedPercent,
-			Type:        diskType,
-		}
-
-		if diskType == "data" {
-			arrayStatus.TotalCapacity += usage.Total
-			arrayStatus.UsedSpace += usage.Used
-		} else if diskType == "cache" {
-			arrayStatus.CacheSize += usage.Total
-		}
-
-		diskInfos = append(diskInfos, diskInfo)
-	}
-
-	// Add parity disks
-	parityDevices := []string{"parity", "parity2"}
-	for _, parityName := range parityDevices {
-		if parityData, exists := diskMap[parityName]; exists {
-			devicePath := parityData["device"]
-			if devicePath == "" {
-				log.Printf("No device path found for parity disk: %s", parityName)
-				continue
-			}
-
-			usage, err := disk.Usage(devicePath)
+	for _, diskPath := range diskPaths {
+		if _, err := os.Stat(diskPath.path); err == nil {
+			usage, err := disk.Usage(diskPath.path)
 			if err != nil {
-				log.Printf("Warning: Could not get disk usage for parity disk %s (%s): %v", parityName, devicePath, err)
+				log.Printf("Warning: Could not get disk usage for %s: %v", diskPath.path, err)
 				continue
 			}
+
+			// Get the actual disk name from the path
+			diskName := strings.TrimPrefix(diskPath.path, "/host/mnt/")
 
 			diskInfo := DiskInfo{
-				Path:        devicePath,
-				Name:        parityName,
+				Path:        diskPath.path,
+				Name:        diskName,
 				Total:       usage.Total,
 				Used:        usage.Used,
 				Free:        usage.Free,
 				UsedPercent: usage.UsedPercent,
-				Type:        "parity",
+				Type:        diskPath.typ,
 			}
 
-			arrayStatus.ParitySize += usage.Total
+			if diskPath.typ == "data" {
+				arrayStatus.TotalCapacity += usage.Total
+				arrayStatus.UsedSpace += usage.Used
+			} else if diskPath.typ == "cache" {
+				arrayStatus.CacheSize += usage.Total
+			}
+
 			diskInfos = append(diskInfos, diskInfo)
 		}
+	}
+
+	// If we found any disks, consider the array started
+	if len(diskInfos) > 0 {
+		arrayStatus.State = "Started"
+		arrayStatus.Protection = "Protected"
+	} else {
+		arrayStatus.State = "Stopped"
+		arrayStatus.Protection = "Not Protected"
 	}
 
 	return arrayStatus, diskInfos, nil
