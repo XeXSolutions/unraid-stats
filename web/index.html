@@ -29,63 +29,127 @@
             }
         }
     </script>
+    <style>
+        .card {
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+            background: rgba(255, 255, 255, 0.8);
+        }
+        .dark .card {
+            background: rgba(31, 41, 55, 0.8);
+            backdrop-filter: blur(10px);
+            border-color: rgba(55, 65, 81, 0.5);
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px -8px rgba(0, 0, 0, 0.3);
+        }
+        .dark .card:hover {
+            box-shadow: 0 8px 20px -8px rgba(0, 0, 0, 0.5);
+            border-color: rgba(75, 85, 101, 0.7);
+        }
+        .progress-bar {
+            transition: width 0.5s ease-in-out;
+        }
+        .stat-value {
+            transition: all 0.2s ease;
+        }
+        .stat-value:hover {
+            transform: scale(1.05);
+        }
+        body {
+            transition: background-color 0.3s ease;
+        }
+        .theme-toggle {
+            transition: all 0.3s ease;
+            @apply ring-1 ring-gray-200 dark:ring-gray-600;
+        }
+        .theme-toggle:hover {
+            transform: rotate(180deg);
+            @apply ring-2 ring-primary-400 dark:ring-primary-500;
+        }
+        .interval-select {
+            transition: all 0.2s ease;
+            @apply ring-1 ring-gray-200 dark:ring-gray-600 focus:outline-none focus:ring-2 focus:ring-primary-400 dark:focus:ring-primary-500;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+            min-width: 120px;
+        }
+        .dark .interval-select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+        }
+    </style>
 </head>
-<body class="dark:bg-gray-900 bg-gray-50 transition-colors duration-200">
+<body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
     <div class="flex flex-col min-h-screen">
         <!-- Main content wrapper -->
         <div class="flex-1 p-2 sm:p-4 pb-16">
             <!-- Header -->
             <div class="flex justify-between items-center mb-4 px-2">
                 <h1 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white truncate">Unraid Server Statistics</h1>
-                <button id="themeToggle" class="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white flex-shrink-0 ml-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hidden dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                    </svg>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 block dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                    </svg>
-                </button>
+                <div class="flex items-center gap-3">
+                    <select id="updateInterval" class="interval-select text-sm rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-200 p-2 pl-3 hover:bg-gray-100 dark:hover:bg-gray-700/70 transition-colors cursor-pointer">
+                        <option value="1000">1 second</option>
+                        <option value="2000">2 seconds</option>
+                        <option value="5000" selected>5 seconds</option>
+                        <option value="10000">10 seconds</option>
+                        <option value="30000">30 seconds</option>
+                        <option value="60000">1 minute</option>
+                    </select>
+                    <button id="themeToggle" class="theme-toggle p-2 rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700/70 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hidden dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 block dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                        </svg>
+                    </button>
+                </div>
             </div>
 
             <!-- Main Content -->
             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4 mb-4">
                 <!-- System Info Card -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-3 sm:p-4">
+                <div class="card rounded-lg shadow-lg p-3 sm:p-4">
                     <h2 class="text-base sm:text-lg font-semibold mb-2 sm:mb-3 text-gray-700 dark:text-gray-200">System Info</h2>
                     <div class="space-y-2 text-sm">
-                        <div class="flex justify-between">
+                        <div class="flex justify-between items-center p-2 rounded-lg bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                             <span class="text-gray-600 dark:text-gray-400">Hostname:</span>
-                            <span id="hostname" class="font-medium text-gray-800 dark:text-gray-200"></span>
+                            <span id="hostname" class="stat-value font-medium text-gray-800 dark:text-gray-200"></span>
                         </div>
-                        <div class="flex justify-between">
+                        <div class="flex justify-between items-center p-2 rounded-lg bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                             <span class="text-gray-600 dark:text-gray-400">Platform:</span>
-                            <span id="platform" class="font-medium text-gray-800 dark:text-gray-200"></span>
+                            <span id="platform" class="stat-value font-medium text-gray-800 dark:text-gray-200"></span>
                         </div>
-                        <div class="flex justify-between">
+                        <div class="flex justify-between items-center p-2 rounded-lg bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                             <span class="text-gray-600 dark:text-gray-400">Uptime:</span>
-                            <span id="uptime" class="font-medium text-gray-800 dark:text-gray-200"></span>
+                            <span id="uptime" class="stat-value font-medium text-gray-800 dark:text-gray-200"></span>
                         </div>
-                        <div class="flex justify-between">
+                        <div class="flex justify-between items-center p-2 rounded-lg bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                             <span class="text-gray-600 dark:text-gray-400">CPU Cores:</span>
-                            <span id="cpuCores" class="font-medium text-gray-800 dark:text-gray-200"></span>
+                            <span id="cpuCores" class="stat-value font-medium text-gray-800 dark:text-gray-200"></span>
                         </div>
-                        <div class="flex justify-between">
+                        <div class="flex justify-between items-center p-2 rounded-lg bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                             <span class="text-gray-600 dark:text-gray-400">Load Average:</span>
-                            <span id="loadAvg" class="font-medium text-gray-800 dark:text-gray-200"></span>
+                            <span id="loadAvg" class="stat-value font-medium text-gray-800 dark:text-gray-200"></span>
                         </div>
                     </div>
                 </div>
 
                 <!-- CPU Usage Card -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-3 sm:p-4">
+                <div class="card rounded-lg shadow-lg p-3 sm:p-4">
                     <div class="flex flex-wrap justify-between items-center mb-2 sm:mb-3 gap-2">
                         <h2 class="text-base sm:text-lg font-semibold text-gray-700 dark:text-gray-200">CPU Usage</h2>
                         <div class="flex items-center gap-3 text-sm">
-                            <div>
+                            <div class="stat-value">
                                 <span class="text-gray-600 dark:text-gray-400">Total:</span>
                                 <span id="cpuTotal" class="font-medium text-gray-800 dark:text-gray-200">0%</span>
                             </div>
-                            <div>
+                            <div class="stat-value">
                                 <span class="text-gray-600 dark:text-gray-400">Temp:</span>
                                 <span id="cpuTemp" class="font-medium text-gray-800 dark:text-gray-200">N/A</span>
                             </div>
@@ -97,21 +161,21 @@
                 </div>
 
                 <!-- Memory Usage Card -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-3 sm:p-4">
+                <div class="card rounded-lg shadow-lg p-3 sm:p-4">
                     <h2 class="text-base sm:text-lg font-semibold mb-2 sm:mb-3 text-gray-700 dark:text-gray-200">Memory Usage</h2>
                     <div class="h-[150px] sm:h-[200px] mb-2">
                         <canvas id="memoryChart"></canvas>
                     </div>
                     <div class="grid grid-cols-3 gap-2 text-sm">
-                        <div class="text-center">
+                        <div class="text-center stat-value">
                             <div class="text-gray-600 dark:text-gray-400 text-xs sm:text-sm">Total</div>
                             <div id="memTotal" class="font-medium text-gray-800 dark:text-gray-200"></div>
                         </div>
-                        <div class="text-center">
+                        <div class="text-center stat-value">
                             <div class="text-gray-600 dark:text-gray-400 text-xs sm:text-sm">Used</div>
                             <div id="memUsed" class="font-medium text-gray-800 dark:text-gray-200"></div>
                         </div>
-                        <div class="text-center">
+                        <div class="text-center stat-value">
                             <div class="text-gray-600 dark:text-gray-400 text-xs sm:text-sm">Cache</div>
                             <div id="memCache" class="font-medium text-gray-800 dark:text-gray-200"></div>
                         </div>
@@ -119,32 +183,32 @@
                 </div>
 
                 <!-- Network Stats Card -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-3 sm:p-4">
+                <div class="card rounded-lg shadow-lg p-3 sm:p-4">
                     <h2 class="text-base sm:text-lg font-semibold mb-2 sm:mb-3 text-gray-700 dark:text-gray-200">Network</h2>
                     <div class="space-y-3 sm:space-y-4">
                         <div>
                             <h3 class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Current Rate</h3>
                             <div class="grid grid-cols-2 gap-2 sm:gap-4">
-                                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-2">
+                                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                                     <div class="text-xs text-gray-500 dark:text-gray-400">Download</div>
-                                    <div id="networkDown" class="text-base sm:text-lg font-semibold text-green-600 dark:text-green-400">0 MB/s</div>
+                                    <div id="networkDown" class="stat-value text-base sm:text-lg font-semibold text-green-600 dark:text-green-400">0 MB/s</div>
                                 </div>
-                                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-2">
+                                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                                     <div class="text-xs text-gray-500 dark:text-gray-400">Upload</div>
-                                    <div id="networkUp" class="text-base sm:text-lg font-semibold text-blue-600 dark:text-blue-400">0 MB/s</div>
+                                    <div id="networkUp" class="stat-value text-base sm:text-lg font-semibold text-blue-600 dark:text-blue-400">0 MB/s</div>
                                 </div>
                             </div>
                         </div>
                         <div>
                             <h3 class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Total Transfer</h3>
                             <div class="grid grid-cols-2 gap-2 sm:gap-4">
-                                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-2">
+                                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                                     <div class="text-xs text-gray-500 dark:text-gray-400">Downloaded</div>
-                                    <div id="networkTotalDown" class="text-sm sm:text-base font-semibold text-gray-800 dark:text-gray-200">0 GB</div>
+                                    <div id="networkTotalDown" class="stat-value text-sm sm:text-base font-semibold text-gray-800 dark:text-gray-200">0 GB</div>
                                 </div>
-                                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-2">
+                                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                                     <div class="text-xs text-gray-500 dark:text-gray-400">Uploaded</div>
-                                    <div id="networkTotalUp" class="text-sm sm:text-base font-semibold text-gray-800 dark:text-gray-200">0 GB</div>
+                                    <div id="networkTotalUp" class="stat-value text-sm sm:text-base font-semibold text-gray-800 dark:text-gray-200">0 GB</div>
                                 </div>
                             </div>
                         </div>
@@ -155,22 +219,22 @@
             <!-- Array and Disk Status -->
             <div class="grid grid-cols-1 lg:grid-cols-5 gap-3 sm:gap-4">
                 <!-- Array Status -->
-                <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-3 sm:p-4">
+                <div class="card lg:col-span-2 rounded-lg shadow-lg p-3 sm:p-4">
                     <h2 class="text-base sm:text-lg font-semibold mb-2 sm:mb-3 text-gray-700 dark:text-gray-200">Array Status</h2>
                     <div class="grid grid-cols-2 gap-2 sm:gap-3">
-                        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-2 sm:p-3">
+                        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-2 sm:p-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                             <div class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Total Capacity</div>
-                            <div id="arrayCapacity" class="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-200">-</div>
+                            <div id="arrayCapacity" class="stat-value text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-200">-</div>
                         </div>
-                        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-2 sm:p-3">
+                        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-2 sm:p-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                             <div class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Used Space</div>
-                            <div id="arrayUsed" class="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-200">-</div>
+                            <div id="arrayUsed" class="stat-value text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-200">-</div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Disk Usage -->
-                <div class="lg:col-span-3 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-3 sm:p-4">
+                <div class="card lg:col-span-3 rounded-lg shadow-lg p-3 sm:p-4">
                     <h2 class="text-base sm:text-lg font-semibold mb-2 sm:mb-3 text-gray-700 dark:text-gray-200">Disk Usage</h2>
                     <div id="diskStats" class="space-y-2 sm:space-y-3">
                         <!-- Disk stats will be populated here -->
@@ -183,7 +247,7 @@
         <footer class="w-full bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-2 mt-auto">
             <div class="container mx-auto text-center text-xs text-gray-600 dark:text-gray-400">
                 <span>© 2025 All rights reserved. | </span>
-                <a href="https://github.com/XeXSolutions" target="_blank" rel="noopener noreferrer" class="text-primary-600 dark:text-primary-400 hover:underline">XeXSolutions</a>
+                <a href="https://github.com/XeXSolutions" target="_blank" rel="noopener noreferrer" class="text-primary-600 dark:text-primary-400 hover:underline transition-colors">XeXSolutions</a>
             </div>
         </footer>
     </div>
@@ -191,6 +255,7 @@
     <script>
         let cpuChart, memoryChart;
         let lastNetworkStats = null;
+        let updateInterval;
 
         // Theme toggle
         const themeToggle = document.getElementById('themeToggle');
@@ -203,6 +268,19 @@
         if (localStorage.theme === 'light') {
             document.documentElement.classList.remove('dark');
         }
+
+        // Update interval handler
+        const intervalSelect = document.getElementById('updateInterval');
+        intervalSelect.addEventListener('change', () => {
+            const interval = parseInt(intervalSelect.value);
+            localStorage.setItem('updateInterval', interval);
+            clearInterval(updateInterval);
+            updateInterval = setInterval(updateStats, interval);
+        });
+
+        // Set initial interval from localStorage or default to 5000
+        const savedInterval = parseInt(localStorage.getItem('updateInterval')) || 5000;
+        intervalSelect.value = savedInterval;
 
         function formatBytes(bytes, decimals = 2) {
             if (bytes === 0) return '0 Bytes';
@@ -482,7 +560,7 @@
         // Initialize charts and start updating stats
         initCharts();
         updateStats();
-        setInterval(updateStats, 5000); // Update every 5 seconds
+        updateInterval = setInterval(updateStats, savedInterval); // Use the saved or default interval
 
         // Update chart colors when theme changes
         const observer = new MutationObserver((mutations) => {
