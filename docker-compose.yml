@@ -15,5 +15,6 @@ services:
       - /var/run/mdcmd.socket:/var/run/mdcmd.socket:ro
       - /var/run/mdstat:/var/run/mdstat:ro
       - /var/local/emhttp/disks.ini:/host/var/local/emhttp/disks.ini:ro,rslave
+      - /var/local/emhttp/var.ini:/var/local/emhttp/var.ini:ro
       - /dev/disk/by-id:/host/dev/disk/by-id:ro
       - /mnt:/host/mnt:ro,rslave
