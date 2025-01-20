@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  unraid-stats:
+    build: .
+    container_name: unraid-stats
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    privileged: true  # Required to access host metrics
+    volumes:
+      - /proc:/host/proc:ro  # Mount host proc
+      - /sys:/host/sys:ro    # Mount host sys 
