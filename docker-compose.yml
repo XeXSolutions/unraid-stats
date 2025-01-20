@@ -2,12 +2,12 @@ version: '3.8'
 
 services:
   unraid-stats:
-    build: .
+    image: ghcr.io/xexsolutions/unraid-stats:latest
     container_name: unraid-stats
     ports:
       - "8080:8080"
     restart: unless-stopped
-    privileged: true  # Required to access host metrics
+    privileged: true
     volumes:
-      - /proc:/host/proc:ro  # Mount host proc
-      - /sys:/host/sys:ro    # Mount host sys 
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro

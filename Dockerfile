@@ -18,6 +18,10 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o unraid-stats cmd/main.go
 # Final stage
 FROM alpine:latest
 
+LABEL org.opencontainers.image.source="https://github.com/yourusername/unraid-stats"
+LABEL org.opencontainers.image.description="Unraid System Statistics Viewer"
+LABEL org.opencontainers.image.licenses=MIT
+
 WORKDIR /app
 
 # Copy the binary from builder

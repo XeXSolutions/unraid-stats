@@ -1,19 +1,19 @@
 <?xml version="1.0"?>
 <Container version="2">
   <Name>unraid-stats</Name>
-  <Repository>ghcr.io/yourusername/unraid-stats:latest</Repository>
-  <Registry>https://github.com/yourusername/unraid-stats</Registry>
+  <Repository>ghcr.io/xexsolutions/unraid-stats:latest</Repository>
+  <Registry>ghcr.io</Registry>
   <Network>bridge</Network>
   <Privileged>true</Privileged>
-  <Support>https://github.com/yourusername/unraid-stats/issues</Support>
-  <Project>https://github.com/yourusername/unraid-stats</Project>
+  <Support>https://github.com/xexsolutions/unraid-stats/issues</Support>
+  <Project>https://github.com/xexsolutions/unraid-stats</Project>
   <Overview>
     A simple and elegant system statistics viewer for Unraid servers.
   </Overview>
   <Category>Tools: System: Status:Stable</Category>
   <WebUI>http://[IP]:[PORT:8080]/</WebUI>
-  <TemplateURL>https://raw.githubusercontent.com/yourusername/unraid-stats/master/unraid-stats.xml</TemplateURL>
-  <Icon>https://raw.githubusercontent.com/yourusername/unraid-stats/master/icon.png</Icon>
+  <TemplateURL>https://raw.githubusercontent.com/xexsolutions/unraid-stats/master/unraid-stats.xml</TemplateURL>
+  <Icon>https://raw.githubusercontent.com/xexsolutions/unraid-stats/master/icon.png</Icon>
   <ExtraParams>--privileged</ExtraParams>
   <Networking>
     <Mode>bridge</Mode>
