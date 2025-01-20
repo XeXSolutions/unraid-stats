@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Unraid Server Stats</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
@@ -24,7 +27,10 @@
                             800: '#075985',
                             900: '#0c4a6e',
                         }
-                    }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
                 }
             }
         }
@@ -84,7 +90,7 @@
         }
     </style>
 </head>
-<body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+<body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-300 font-sans">
     <div class="flex flex-col min-h-screen">
         <!-- Main content wrapper -->
         <div class="flex-1 p-2 sm:p-4 pb-16">
@@ -115,7 +121,12 @@
             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4 mb-4">
                 <!-- System Info Card -->
                 <div class="card rounded-lg shadow-lg p-3 sm:p-4">
-                    <h2 class="text-base sm:text-lg font-semibold mb-2 sm:mb-3 text-gray-700 dark:text-gray-200">System Info</h2>
+                    <h2 class="text-base sm:text-lg font-semibold mb-2 sm:mb-3 text-gray-700 dark:text-gray-200 flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                        System Info
+                    </h2>
                     <div class="space-y-2 text-sm">
                         <div class="flex justify-between items-center p-2 rounded-lg bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                             <span class="text-gray-600 dark:text-gray-400">Hostname:</span>
@@ -143,7 +154,12 @@
                 <!-- CPU Usage Card -->
                 <div class="card rounded-lg shadow-lg p-3 sm:p-4">
                     <div class="flex flex-wrap justify-between items-center mb-2 sm:mb-3 gap-2">
-                        <h2 class="text-base sm:text-lg font-semibold text-gray-700 dark:text-gray-200">CPU Usage</h2>
+                        <h2 class="text-base sm:text-lg font-semibold text-gray-700 dark:text-gray-200 flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+                            </svg>
+                            CPU Usage
+                        </h2>
                         <div class="flex items-center gap-3 text-sm">
                             <div class="stat-value">
                                 <span class="text-gray-600 dark:text-gray-400">Total:</span>
@@ -162,7 +178,12 @@
 
                 <!-- Memory Usage Card -->
                 <div class="card rounded-lg shadow-lg p-3 sm:p-4">
-                    <h2 class="text-base sm:text-lg font-semibold mb-2 sm:mb-3 text-gray-700 dark:text-gray-200">Memory Usage</h2>
+                    <h2 class="text-base sm:text-lg font-semibold mb-2 sm:mb-3 text-gray-700 dark:text-gray-200 flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                        </svg>
+                        Memory Usage
+                    </h2>
                     <div class="h-[150px] sm:h-[200px] mb-2">
                         <canvas id="memoryChart"></canvas>
                     </div>
@@ -184,7 +205,12 @@
 
                 <!-- Network Stats Card -->
                 <div class="card rounded-lg shadow-lg p-3 sm:p-4">
-                    <h2 class="text-base sm:text-lg font-semibold mb-2 sm:mb-3 text-gray-700 dark:text-gray-200">Network</h2>
+                    <h2 class="text-base sm:text-lg font-semibold mb-2 sm:mb-3 text-gray-700 dark:text-gray-200 flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />
+                        </svg>
+                        Network
+                    </h2>
                     <div class="space-y-3 sm:space-y-4">
                         <div>
                             <h3 class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Current Rate</h3>
@@ -220,7 +246,12 @@
             <div class="grid grid-cols-1 lg:grid-cols-5 gap-3 sm:gap-4">
                 <!-- Array Status -->
                 <div class="card lg:col-span-2 rounded-lg shadow-lg p-3 sm:p-4">
-                    <h2 class="text-base sm:text-lg font-semibold mb-2 sm:mb-3 text-gray-700 dark:text-gray-200">Array Status</h2>
+                    <h2 class="text-base sm:text-lg font-semibold mb-2 sm:mb-3 text-gray-700 dark:text-gray-200 flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
+                        </svg>
+                        Array Status
+                    </h2>
                     <div class="grid grid-cols-2 gap-2 sm:gap-3 mb-4">
                         <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-2 sm:p-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                             <div class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Total Capacity</div>
@@ -268,7 +299,12 @@
 
                 <!-- Disk Usage -->
                 <div class="card lg:col-span-3 rounded-lg shadow-lg p-3 sm:p-4">
-                    <h2 class="text-base sm:text-lg font-semibold mb-2 sm:mb-3 text-gray-700 dark:text-gray-200">Disk Usage</h2>
+                    <h2 class="text-base sm:text-lg font-semibold mb-2 sm:mb-3 text-gray-700 dark:text-gray-200 flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                        </svg>
+                        Disk Usage
+                    </h2>
                     <div id="diskStats" class="space-y-2 sm:space-y-3">
                         <!-- Disk stats will be populated here -->
                     </div>
