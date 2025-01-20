@@ -31,159 +31,162 @@
     </script>
 </head>
 <body class="dark:bg-gray-900 bg-gray-50 transition-colors duration-200">
-    <div class="h-screen overflow-y-auto pb-12 p-2 sm:p-4">
-        <!-- Header -->
-        <div class="flex justify-between items-center mb-4 px-2">
-            <h1 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white truncate">Unraid Server Statistics</h1>
-            <button id="themeToggle" class="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white flex-shrink-0 ml-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hidden dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 block dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                </svg>
-            </button>
-        </div>
-
-        <!-- Main Content -->
-        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4 mb-4">
-            <!-- System Info Card -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-3 sm:p-4">
-                <h2 class="text-base sm:text-lg font-semibold mb-2 sm:mb-3 text-gray-700 dark:text-gray-200">System Info</h2>
-                <div class="space-y-2 text-sm">
-                    <div class="flex justify-between">
-                        <span class="text-gray-600 dark:text-gray-400">Hostname:</span>
-                        <span id="hostname" class="font-medium text-gray-800 dark:text-gray-200"></span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-600 dark:text-gray-400">Platform:</span>
-                        <span id="platform" class="font-medium text-gray-800 dark:text-gray-200"></span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-600 dark:text-gray-400">Uptime:</span>
-                        <span id="uptime" class="font-medium text-gray-800 dark:text-gray-200"></span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-600 dark:text-gray-400">CPU Cores:</span>
-                        <span id="cpuCores" class="font-medium text-gray-800 dark:text-gray-200"></span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-600 dark:text-gray-400">Load Average:</span>
-                        <span id="loadAvg" class="font-medium text-gray-800 dark:text-gray-200"></span>
-                    </div>
-                </div>
+    <div class="flex flex-col min-h-screen">
+        <!-- Main content wrapper -->
+        <div class="flex-1 p-2 sm:p-4 pb-16">
+            <!-- Header -->
+            <div class="flex justify-between items-center mb-4 px-2">
+                <h1 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white truncate">Unraid Server Statistics</h1>
+                <button id="themeToggle" class="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white flex-shrink-0 ml-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hidden dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 block dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                    </svg>
+                </button>
             </div>
 
-            <!-- CPU Usage Card -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-3 sm:p-4">
-                <div class="flex flex-wrap justify-between items-center mb-2 sm:mb-3 gap-2">
-                    <h2 class="text-base sm:text-lg font-semibold text-gray-700 dark:text-gray-200">CPU Usage</h2>
-                    <div class="flex items-center gap-3 text-sm">
+            <!-- Main Content -->
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4 mb-4">
+                <!-- System Info Card -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-3 sm:p-4">
+                    <h2 class="text-base sm:text-lg font-semibold mb-2 sm:mb-3 text-gray-700 dark:text-gray-200">System Info</h2>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600 dark:text-gray-400">Hostname:</span>
+                            <span id="hostname" class="font-medium text-gray-800 dark:text-gray-200"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600 dark:text-gray-400">Platform:</span>
+                            <span id="platform" class="font-medium text-gray-800 dark:text-gray-200"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600 dark:text-gray-400">Uptime:</span>
+                            <span id="uptime" class="font-medium text-gray-800 dark:text-gray-200"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600 dark:text-gray-400">CPU Cores:</span>
+                            <span id="cpuCores" class="font-medium text-gray-800 dark:text-gray-200"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600 dark:text-gray-400">Load Average:</span>
+                            <span id="loadAvg" class="font-medium text-gray-800 dark:text-gray-200"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CPU Usage Card -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-3 sm:p-4">
+                    <div class="flex flex-wrap justify-between items-center mb-2 sm:mb-3 gap-2">
+                        <h2 class="text-base sm:text-lg font-semibold text-gray-700 dark:text-gray-200">CPU Usage</h2>
+                        <div class="flex items-center gap-3 text-sm">
+                            <div>
+                                <span class="text-gray-600 dark:text-gray-400">Total:</span>
+                                <span id="cpuTotal" class="font-medium text-gray-800 dark:text-gray-200">0%</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-600 dark:text-gray-400">Temp:</span>
+                                <span id="cpuTemp" class="font-medium text-gray-800 dark:text-gray-200">N/A</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="h-[150px] sm:h-[200px]">
+                        <canvas id="cpuChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Memory Usage Card -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-3 sm:p-4">
+                    <h2 class="text-base sm:text-lg font-semibold mb-2 sm:mb-3 text-gray-700 dark:text-gray-200">Memory Usage</h2>
+                    <div class="h-[150px] sm:h-[200px] mb-2">
+                        <canvas id="memoryChart"></canvas>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 text-sm">
+                        <div class="text-center">
+                            <div class="text-gray-600 dark:text-gray-400 text-xs sm:text-sm">Total</div>
+                            <div id="memTotal" class="font-medium text-gray-800 dark:text-gray-200"></div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-gray-600 dark:text-gray-400 text-xs sm:text-sm">Used</div>
+                            <div id="memUsed" class="font-medium text-gray-800 dark:text-gray-200"></div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-gray-600 dark:text-gray-400 text-xs sm:text-sm">Cache</div>
+                            <div id="memCache" class="font-medium text-gray-800 dark:text-gray-200"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Network Stats Card -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-3 sm:p-4">
+                    <h2 class="text-base sm:text-lg font-semibold mb-2 sm:mb-3 text-gray-700 dark:text-gray-200">Network</h2>
+                    <div class="space-y-3 sm:space-y-4">
                         <div>
-                            <span class="text-gray-600 dark:text-gray-400">Total:</span>
-                            <span id="cpuTotal" class="font-medium text-gray-800 dark:text-gray-200">0%</span>
+                            <h3 class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Current Rate</h3>
+                            <div class="grid grid-cols-2 gap-2 sm:gap-4">
+                                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-2">
+                                    <div class="text-xs text-gray-500 dark:text-gray-400">Download</div>
+                                    <div id="networkDown" class="text-base sm:text-lg font-semibold text-green-600 dark:text-green-400">0 MB/s</div>
+                                </div>
+                                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-2">
+                                    <div class="text-xs text-gray-500 dark:text-gray-400">Upload</div>
+                                    <div id="networkUp" class="text-base sm:text-lg font-semibold text-blue-600 dark:text-blue-400">0 MB/s</div>
+                                </div>
+                            </div>
                         </div>
                         <div>
-                            <span class="text-gray-600 dark:text-gray-400">Temp:</span>
-                            <span id="cpuTemp" class="font-medium text-gray-800 dark:text-gray-200">N/A</span>
+                            <h3 class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Total Transfer</h3>
+                            <div class="grid grid-cols-2 gap-2 sm:gap-4">
+                                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-2">
+                                    <div class="text-xs text-gray-500 dark:text-gray-400">Downloaded</div>
+                                    <div id="networkTotalDown" class="text-sm sm:text-base font-semibold text-gray-800 dark:text-gray-200">0 GB</div>
+                                </div>
+                                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-2">
+                                    <div class="text-xs text-gray-500 dark:text-gray-400">Uploaded</div>
+                                    <div id="networkTotalUp" class="text-sm sm:text-base font-semibold text-gray-800 dark:text-gray-200">0 GB</div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </div>
-                <div class="h-[150px] sm:h-[200px]">
-                    <canvas id="cpuChart"></canvas>
-                </div>
-            </div>
-
-            <!-- Memory Usage Card -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-3 sm:p-4">
-                <h2 class="text-base sm:text-lg font-semibold mb-2 sm:mb-3 text-gray-700 dark:text-gray-200">Memory Usage</h2>
-                <div class="h-[150px] sm:h-[200px] mb-2">
-                    <canvas id="memoryChart"></canvas>
-                </div>
-                <div class="grid grid-cols-3 gap-2 text-sm">
-                    <div class="text-center">
-                        <div class="text-gray-600 dark:text-gray-400 text-xs sm:text-sm">Total</div>
-                        <div id="memTotal" class="font-medium text-gray-800 dark:text-gray-200"></div>
-                    </div>
-                    <div class="text-center">
-                        <div class="text-gray-600 dark:text-gray-400 text-xs sm:text-sm">Used</div>
-                        <div id="memUsed" class="font-medium text-gray-800 dark:text-gray-200"></div>
-                    </div>
-                    <div class="text-center">
-                        <div class="text-gray-600 dark:text-gray-400 text-xs sm:text-sm">Cache</div>
-                        <div id="memCache" class="font-medium text-gray-800 dark:text-gray-200"></div>
                     </div>
                 </div>
             </div>
 
-            <!-- Network Stats Card -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-3 sm:p-4">
-                <h2 class="text-base sm:text-lg font-semibold mb-2 sm:mb-3 text-gray-700 dark:text-gray-200">Network</h2>
-                <div class="space-y-3 sm:space-y-4">
-                    <div>
-                        <h3 class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Current Rate</h3>
-                        <div class="grid grid-cols-2 gap-2 sm:gap-4">
-                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-2">
-                                <div class="text-xs text-gray-500 dark:text-gray-400">Download</div>
-                                <div id="networkDown" class="text-base sm:text-lg font-semibold text-green-600 dark:text-green-400">0 MB/s</div>
-                            </div>
-                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-2">
-                                <div class="text-xs text-gray-500 dark:text-gray-400">Upload</div>
-                                <div id="networkUp" class="text-base sm:text-lg font-semibold text-blue-600 dark:text-blue-400">0 MB/s</div>
-                            </div>
+            <!-- Array and Disk Status -->
+            <div class="grid grid-cols-1 lg:grid-cols-5 gap-3 sm:gap-4">
+                <!-- Array Status -->
+                <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-3 sm:p-4">
+                    <h2 class="text-base sm:text-lg font-semibold mb-2 sm:mb-3 text-gray-700 dark:text-gray-200">Array Status</h2>
+                    <div class="grid grid-cols-2 gap-2 sm:gap-3">
+                        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-2 sm:p-3">
+                            <div class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Total Capacity</div>
+                            <div id="arrayCapacity" class="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-200">-</div>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-2 sm:p-3">
+                            <div class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Used Space</div>
+                            <div id="arrayUsed" class="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-200">-</div>
                         </div>
                     </div>
-                    <div>
-                        <h3 class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Total Transfer</h3>
-                        <div class="grid grid-cols-2 gap-2 sm:gap-4">
-                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-2">
-                                <div class="text-xs text-gray-500 dark:text-gray-400">Downloaded</div>
-                                <div id="networkTotalDown" class="text-sm sm:text-base font-semibold text-gray-800 dark:text-gray-200">0 GB</div>
-                            </div>
-                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-2">
-                                <div class="text-xs text-gray-500 dark:text-gray-400">Uploaded</div>
-                                <div id="networkTotalUp" class="text-sm sm:text-base font-semibold text-gray-800 dark:text-gray-200">0 GB</div>
-                            </div>
-                        </div>
+                </div>
+
+                <!-- Disk Usage -->
+                <div class="lg:col-span-3 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-3 sm:p-4">
+                    <h2 class="text-base sm:text-lg font-semibold mb-2 sm:mb-3 text-gray-700 dark:text-gray-200">Disk Usage</h2>
+                    <div id="diskStats" class="space-y-2 sm:space-y-3">
+                        <!-- Disk stats will be populated here -->
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Array and Disk Status -->
-        <div class="grid grid-cols-1 lg:grid-cols-5 gap-3 sm:gap-4">
-            <!-- Array Status -->
-            <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-3 sm:p-4">
-                <h2 class="text-base sm:text-lg font-semibold mb-2 sm:mb-3 text-gray-700 dark:text-gray-200">Array Status</h2>
-                <div class="grid grid-cols-2 gap-2 sm:gap-3">
-                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-2 sm:p-3">
-                        <div class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Total Capacity</div>
-                        <div id="arrayCapacity" class="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-200">-</div>
-                    </div>
-                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-2 sm:p-3">
-                        <div class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Used Space</div>
-                        <div id="arrayUsed" class="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-200">-</div>
-                    </div>
-                </div>
+        <!-- Footer -->
+        <footer class="w-full bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-2 mt-auto">
+            <div class="container mx-auto text-center text-xs text-gray-600 dark:text-gray-400">
+                <span>© 2025 All rights reserved. | </span>
+                <a href="https://github.com/XeXSolutions" target="_blank" rel="noopener noreferrer" class="text-primary-600 dark:text-primary-400 hover:underline">XeXSolutions</a>
             </div>
-
-            <!-- Disk Usage -->
-            <div class="lg:col-span-3 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-3 sm:p-4">
-                <h2 class="text-base sm:text-lg font-semibold mb-2 sm:mb-3 text-gray-700 dark:text-gray-200">Disk Usage</h2>
-                <div id="diskStats" class="space-y-2 sm:space-y-3">
-                    <!-- Disk stats will be populated here -->
-                </div>
-            </div>
-        </div>
+        </footer>
     </div>
-
-    <!-- Footer -->
-    <footer class="fixed bottom-0 left-0 right-0 p-2 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 text-center text-xs text-gray-600 dark:text-gray-400">
-        <div class="container mx-auto">
-            <span>© 2025 All rights reserved. | </span>
-            <a href="https://github.com/XeXSolutions" target="_blank" rel="noopener noreferrer" class="text-primary-600 dark:text-primary-400 hover:underline">XeXSolutions</a>
-        </div>
-    </footer>
 
     <script>
         let cpuChart, memoryChart;
@@ -211,6 +214,9 @@
         }
 
         function formatBitrate(bytesPerSecond) {
+            if (!bytesPerSecond || isNaN(bytesPerSecond)) {
+                return '0 B/s';
+            }
             return formatBytes(bytesPerSecond) + '/s';
         }
 
@@ -372,18 +378,24 @@
                     // Update network stats
                     if (data.network_stats) {
                         if (lastNetworkStats) {
-                            const timeDiff = (data.network_stats.timestamp - lastNetworkStats.timestamp) / 1e9; // Convert to seconds
-                            const downRate = (data.network_stats.bytes_recv - lastNetworkStats.bytes_recv) / timeDiff;
-                            const upRate = (data.network_stats.bytes_sent - lastNetworkStats.bytes_sent) / timeDiff;
+                            const timeDiff = (new Date(data.network_stats.timestamp) - new Date(lastNetworkStats.timestamp)) / 1000; // Convert to seconds
+                            if (timeDiff > 0) {
+                                const downRate = Math.max(0, (data.network_stats.bytes_recv - lastNetworkStats.bytes_recv) / timeDiff);
+                                const upRate = Math.max(0, (data.network_stats.bytes_sent - lastNetworkStats.bytes_sent) / timeDiff);
 
-                            document.getElementById('networkDown').textContent = formatBitrate(downRate);
-                            document.getElementById('networkUp').textContent = formatBitrate(upRate);
+                                document.getElementById('networkDown').textContent = formatBitrate(downRate);
+                                document.getElementById('networkUp').textContent = formatBitrate(upRate);
+                            }
                         }
 
                         document.getElementById('networkTotalDown').textContent = formatBytes(data.network_stats.bytes_recv);
                         document.getElementById('networkTotalUp').textContent = formatBytes(data.network_stats.bytes_sent);
 
-                        lastNetworkStats = data.network_stats;
+                        lastNetworkStats = {
+                            timestamp: data.network_stats.timestamp,
+                            bytes_recv: data.network_stats.bytes_recv,
+                            bytes_sent: data.network_stats.bytes_sent
+                        };
                     }
 
                     // Update array status
