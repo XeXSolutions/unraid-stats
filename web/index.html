@@ -397,23 +397,101 @@
                     // Update disk stats
                     if (data.disk_stats) {
                         const diskStatsDiv = document.getElementById('diskStats');
-                        diskStatsDiv.innerHTML = data.disk_stats.map(disk => `
-                            <div class="flex items-center gap-2 sm:gap-3">
-                                <div class="flex-1 min-w-0">
-                                    <div class="flex justify-between items-center mb-1">
-                                        <p class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 truncate">${disk.path}</p>
-                                        <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 ml-2">${disk.used_percent}%</p>
-                                    </div>
-                                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
-                                        <div class="bg-primary-600 h-1.5 rounded-full transition-all" 
-                                             style="width: ${disk.used_percent}%"></div>
+                        const disksByType = data.disk_stats.reduce((acc, disk) => {
+                            if (!acc[disk.type]) {
+                                acc[disk.type] = [];
+                            }
+                            acc[disk.type].push(disk);
+                            return acc;
+                        }, {});
+
+                        const diskSections = [];
+
+                        // Add parity drives first
+                        if (disksByType.parity) {
+                            diskSections.push(`
+                                <div class="mb-4">
+                                    <h3 class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Parity Drives</h3>
+                                    <div class="space-y-2">
+                                        ${disksByType.parity.map(disk => `
+                                            <div class="flex items-center gap-2 sm:gap-3">
+                                                <div class="flex-1 min-w-0">
+                                                    <div class="flex justify-between items-center mb-1">
+                                                        <p class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 truncate">${disk.name}</p>
+                                                        <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 ml-2">${disk.used_percent.toFixed(1)}%</p>
+                                                    </div>
+                                                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                                                        <div class="bg-yellow-500 dark:bg-yellow-600 h-1.5 rounded-full transition-all" 
+                                                             style="width: ${disk.used_percent}%"></div>
+                                                    </div>
+                                                </div>
+                                                <div class="text-right text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                                                    ${formatBytes(disk.used)} / ${formatBytes(disk.total)}
+                                                </div>
+                                            </div>
+                                        `).join('')}
                                     </div>
                                 </div>
-                                <div class="text-right text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap">
-                                    ${formatBytes(disk.used)} / ${formatBytes(disk.total)}
+                            `);
+                        }
+
+                        // Add data drives
+                        if (disksByType.data) {
+                            diskSections.push(`
+                                <div class="mb-4">
+                                    <h3 class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Array Drives</h3>
+                                    <div class="space-y-2">
+                                        ${disksByType.data.map(disk => `
+                                            <div class="flex items-center gap-2 sm:gap-3">
+                                                <div class="flex-1 min-w-0">
+                                                    <div class="flex justify-between items-center mb-1">
+                                                        <p class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 truncate">${disk.name}</p>
+                                                        <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 ml-2">${disk.used_percent.toFixed(1)}%</p>
+                                                    </div>
+                                                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                                                        <div class="bg-primary-500 dark:bg-primary-600 h-1.5 rounded-full transition-all" 
+                                                             style="width: ${disk.used_percent}%"></div>
+                                                    </div>
+                                                </div>
+                                                <div class="text-right text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                                                    ${formatBytes(disk.used)} / ${formatBytes(disk.total)}
+                                                </div>
+                                            </div>
+                                        `).join('')}
+                                    </div>
                                 </div>
-                            </div>
-                        `).join('');
+                            `);
+                        }
+
+                        // Add cache drives
+                        if (disksByType.cache) {
+                            diskSections.push(`
+                                <div class="mb-4">
+                                    <h3 class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Cache Drives</h3>
+                                    <div class="space-y-2">
+                                        ${disksByType.cache.map(disk => `
+                                            <div class="flex items-center gap-2 sm:gap-3">
+                                                <div class="flex-1 min-w-0">
+                                                    <div class="flex justify-between items-center mb-1">
+                                                        <p class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 truncate">${disk.name}</p>
+                                                        <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 ml-2">${disk.used_percent.toFixed(1)}%</p>
+                                                    </div>
+                                                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                                                        <div class="bg-green-500 dark:bg-green-600 h-1.5 rounded-full transition-all" 
+                                                             style="width: ${disk.used_percent}%"></div>
+                                                    </div>
+                                                </div>
+                                                <div class="text-right text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                                                    ${formatBytes(disk.used)} / ${formatBytes(disk.total)}
+                                                </div>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            `);
+                        }
+
+                        diskStatsDiv.innerHTML = diskSections.join('');
                     }
                 })
                 .catch(error => console.error('Error fetching stats:', error));
