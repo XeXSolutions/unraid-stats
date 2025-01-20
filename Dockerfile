@@ -32,8 +32,8 @@ COPY --from=builder /app/unraid-stats .
 # Copy web files
 COPY --from=builder /app/web ./web
 
-# Expose port 8080
-EXPOSE 8080
+# Expose port 8085
+EXPOSE 8085
 
 # Run the binary
 CMD ["./unraid-stats"]

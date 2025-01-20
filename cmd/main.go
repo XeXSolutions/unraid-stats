@@ -62,11 +62,25 @@ type SystemStats struct {
 
 func readUnraidConfig() (*ArrayStatus, []DiskInfo, error) {
 	arrayStatus := &ArrayStatus{
-		State:      "Started", // Default to started since we can read the disks
-		Protection: "Protected",
+		State:      "Stopped",
+		Protection: "Not Protected",
 	}
 
 	var diskInfos []DiskInfo
+
+	// Check array status from mdstat
+	mdstatPath := "/host/proc/mdstat"
+	if mdstatData, err := ioutil.ReadFile(mdstatPath); err == nil {
+		mdstatContent := string(mdstatData)
+		log.Printf("Read mdstat content: %s", mdstatContent)
+		if strings.Contains(mdstatContent, "md0") {
+			arrayStatus.State = "Started"
+			arrayStatus.Protection = "Protected"
+			log.Printf("Array detected as Started and Protected")
+		}
+	} else {
+		log.Printf("Could not read mdstat: %v", err)
+	}
 
 	// Read array disks
 	diskPaths := []struct {
@@ -85,8 +99,10 @@ func readUnraidConfig() (*ArrayStatus, []DiskInfo, error) {
 		{"/host/mnt/user", "user"},
 	}
 
+	log.Printf("Checking disk paths...")
 	for _, diskPath := range diskPaths {
 		if _, err := os.Stat(diskPath.path); err == nil {
+			log.Printf("Found disk at %s", diskPath.path)
 			usage, err := disk.Usage(diskPath.path)
 			if err != nil {
 				log.Printf("Warning: Could not get disk usage for %s: %v", diskPath.path, err)
@@ -109,22 +125,21 @@ func readUnraidConfig() (*ArrayStatus, []DiskInfo, error) {
 			if diskPath.typ == "data" {
 				arrayStatus.TotalCapacity += usage.Total
 				arrayStatus.UsedSpace += usage.Used
+				log.Printf("Added data disk %s: total=%d, used=%d", diskName, usage.Total, usage.Used)
 			} else if diskPath.typ == "cache" {
 				arrayStatus.CacheSize += usage.Total
+				log.Printf("Added cache disk %s: total=%d", diskName, usage.Total)
 			}
 
 			diskInfos = append(diskInfos, diskInfo)
+		} else {
+			log.Printf("Disk not found at %s: %v", diskPath.path, err)
 		}
 	}
 
-	// If we found any disks, consider the array started
-	if len(diskInfos) > 0 {
-		arrayStatus.State = "Started"
-		arrayStatus.Protection = "Protected"
-	} else {
-		arrayStatus.State = "Stopped"
-		arrayStatus.Protection = "Not Protected"
-	}
+	log.Printf("Found %d disks total", len(diskInfos))
+	log.Printf("Array status: state=%s, protection=%s, total=%d, used=%d",
+		arrayStatus.State, arrayStatus.Protection, arrayStatus.TotalCapacity, arrayStatus.UsedSpace)
 
 	return arrayStatus, diskInfos, nil
 }
