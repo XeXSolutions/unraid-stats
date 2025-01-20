@@ -11,8 +11,8 @@ services:
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
-      - /var/local/emhttp:/host/var/local/emhttp:ro
+      - /var/local/emhttp:/host/var/local/emhttp:ro,rslave
       - /var/run/mdcmd.socket:/var/run/mdcmd.socket:ro
       - /var/run/mdstat:/var/run/mdstat:ro
-      - /var/local/emhttp/disks.ini:/host/var/local/emhttp/disks.ini:ro
+      - /var/local/emhttp/disks.ini:/host/var/local/emhttp/disks.ini:ro,rslave
       - /dev/disk/by-id:/host/dev/disk/by-id:ro
