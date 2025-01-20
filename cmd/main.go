@@ -165,12 +165,19 @@ func readUnraidConfig() (*ArrayStatus, []DiskInfo, error) {
 func getSystemStats() (*SystemStats, error) {
 	// Try to get Unraid server name first
 	hostname := "Unknown"
+	platform := "Unraid" // Default to Unraid
+
+	// Read var.ini for server name and version
 	if varData, err := ioutil.ReadFile("/var/local/emhttp/var.ini"); err == nil {
 		lines := strings.Split(string(varData), "\n")
 		for _, line := range lines {
 			if strings.HasPrefix(line, "NAME=") {
 				hostname = strings.Trim(strings.TrimPrefix(line, "NAME="), "\"")
-				break
+			} else if strings.HasPrefix(line, "version=") {
+				version := strings.Trim(strings.TrimPrefix(line, "version="), "\"")
+				if version != "" {
+					platform = fmt.Sprintf("Unraid %s", version)
+				}
 			}
 		}
 	} else {
@@ -256,7 +263,7 @@ func getSystemStats() (*SystemStats, error) {
 		ArrayStatus:  arrayStatus,
 		DiskStats:    diskInfos,
 		Uptime:       time.Duration(hostInfo.Uptime) * time.Second,
-		Platform:     hostInfo.Platform,
+		Platform:     platform,
 	}, nil
 }
 
