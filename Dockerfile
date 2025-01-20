@@ -3,22 +3,25 @@ FROM golang:1.21-alpine AS builder
 
 WORKDIR /app
 
-# Copy go mod and sum files
+# Install build dependencies
+RUN apk add --no-cache git
+
+# Copy go mod files first for better caching
 COPY go.mod go.sum ./
 
 # Download dependencies
-RUN go mod download
+RUN go mod download && go mod verify
 
-# Copy source code
+# Copy the rest of the source code
 COPY . .
 
-# Build the application
-RUN CGO_ENABLED=0 GOOS=linux go build -o unraid-stats cmd/main.go
+# Build the application with CGO disabled
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o unraid-stats ./cmd/main.go
 
 # Final stage
 FROM alpine:latest
 
-LABEL org.opencontainers.image.source="https://github.com/xexsolutions/unraid-stats"
+LABEL org.opencontainers.image.source="https://github.com/XeXSolutions/unraid-stats"
 LABEL org.opencontainers.image.description="Unraid System Statistics Viewer"
 LABEL org.opencontainers.image.licenses=MIT
 
@@ -33,4 +36,4 @@ COPY --from=builder /app/web ./web
 EXPOSE 8080
 
 # Run the binary
-CMD ["./unraid-stats"] 
+CMD ["./unraid-stats"]

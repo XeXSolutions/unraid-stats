@@ -1,55 +1,215 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Unraid Server Stats</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
 </head>
-<body class="bg-gray-100">
-    <div class="container mx-auto px-4 py-8">
-        <h1 class="text-3xl font-bold mb-8 text-gray-800">Unraid Server Statistics</h1>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+<body class="dark:bg-gray-900 bg-gray-50 transition-colors duration-200">
+    <div class="h-screen overflow-y-auto p-2 sm:p-4">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-4 px-2">
+            <h1 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white truncate">Unraid Server Statistics</h1>
+            <button id="themeToggle" class="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white flex-shrink-0 ml-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hidden dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 block dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Main Content -->
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4 mb-4">
             <!-- System Info Card -->
-            <div class="bg-white rounded-lg shadow p-6">
-                <h2 class="text-xl font-semibold mb-4 text-gray-700">System Info</h2>
-                <div class="space-y-2">
-                    <p class="text-gray-600">Hostname: <span id="hostname" class="font-medium text-gray-800"></span></p>
-                    <p class="text-gray-600">Platform: <span id="platform" class="font-medium text-gray-800"></span></p>
-                    <p class="text-gray-600">Uptime: <span id="uptime" class="font-medium text-gray-800"></span></p>
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-3 sm:p-4">
+                <h2 class="text-base sm:text-lg font-semibold mb-2 sm:mb-3 text-gray-700 dark:text-gray-200">System Info</h2>
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600 dark:text-gray-400">Hostname:</span>
+                        <span id="hostname" class="font-medium text-gray-800 dark:text-gray-200"></span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600 dark:text-gray-400">Platform:</span>
+                        <span id="platform" class="font-medium text-gray-800 dark:text-gray-200"></span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600 dark:text-gray-400">Uptime:</span>
+                        <span id="uptime" class="font-medium text-gray-800 dark:text-gray-200"></span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600 dark:text-gray-400">CPU Cores:</span>
+                        <span id="cpuCores" class="font-medium text-gray-800 dark:text-gray-200"></span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600 dark:text-gray-400">Load Average:</span>
+                        <span id="loadAvg" class="font-medium text-gray-800 dark:text-gray-200"></span>
+                    </div>
                 </div>
             </div>
 
             <!-- CPU Usage Card -->
-            <div class="bg-white rounded-lg shadow p-6">
-                <h2 class="text-xl font-semibold mb-4 text-gray-700">CPU Usage</h2>
-                <canvas id="cpuChart"></canvas>
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-3 sm:p-4">
+                <div class="flex flex-wrap justify-between items-center mb-2 sm:mb-3 gap-2">
+                    <h2 class="text-base sm:text-lg font-semibold text-gray-700 dark:text-gray-200">CPU Usage</h2>
+                    <div class="flex items-center gap-3 text-sm">
+                        <div>
+                            <span class="text-gray-600 dark:text-gray-400">Total:</span>
+                            <span id="cpuTotal" class="font-medium text-gray-800 dark:text-gray-200">0%</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-600 dark:text-gray-400">Temp:</span>
+                            <span id="cpuTemp" class="font-medium text-gray-800 dark:text-gray-200">N/A</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="h-[150px] sm:h-[200px]">
+                    <canvas id="cpuChart"></canvas>
+                </div>
             </div>
 
             <!-- Memory Usage Card -->
-            <div class="bg-white rounded-lg shadow p-6">
-                <h2 class="text-xl font-semibold mb-4 text-gray-700">Memory Usage</h2>
-                <canvas id="memoryChart"></canvas>
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-3 sm:p-4">
+                <h2 class="text-base sm:text-lg font-semibold mb-2 sm:mb-3 text-gray-700 dark:text-gray-200">Memory Usage</h2>
+                <div class="h-[150px] sm:h-[200px] mb-2">
+                    <canvas id="memoryChart"></canvas>
+                </div>
+                <div class="grid grid-cols-3 gap-2 text-sm">
+                    <div class="text-center">
+                        <div class="text-gray-600 dark:text-gray-400 text-xs sm:text-sm">Total</div>
+                        <div id="memTotal" class="font-medium text-gray-800 dark:text-gray-200"></div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-gray-600 dark:text-gray-400 text-xs sm:text-sm">Used</div>
+                        <div id="memUsed" class="font-medium text-gray-800 dark:text-gray-200"></div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-gray-600 dark:text-gray-400 text-xs sm:text-sm">Cache</div>
+                        <div id="memCache" class="font-medium text-gray-800 dark:text-gray-200"></div>
+                    </div>
+                </div>
             </div>
 
-            <!-- Disk Usage Card -->
-            <div class="bg-white rounded-lg shadow p-6">
-                <h2 class="text-xl font-semibold mb-4 text-gray-700">Disk Usage</h2>
-                <div id="diskStats" class="space-y-4"></div>
+            <!-- Network Stats Card -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-3 sm:p-4">
+                <h2 class="text-base sm:text-lg font-semibold mb-2 sm:mb-3 text-gray-700 dark:text-gray-200">Network</h2>
+                <div class="space-y-3 sm:space-y-4">
+                    <div>
+                        <h3 class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Current Rate</h3>
+                        <div class="grid grid-cols-2 gap-2 sm:gap-4">
+                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-2">
+                                <div class="text-xs text-gray-500 dark:text-gray-400">Download</div>
+                                <div id="networkDown" class="text-base sm:text-lg font-semibold text-green-600 dark:text-green-400">0 MB/s</div>
+                            </div>
+                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-2">
+                                <div class="text-xs text-gray-500 dark:text-gray-400">Upload</div>
+                                <div id="networkUp" class="text-base sm:text-lg font-semibold text-blue-600 dark:text-blue-400">0 MB/s</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Total Transfer</h3>
+                        <div class="grid grid-cols-2 gap-2 sm:gap-4">
+                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-2">
+                                <div class="text-xs text-gray-500 dark:text-gray-400">Downloaded</div>
+                                <div id="networkTotalDown" class="text-sm sm:text-base font-semibold text-gray-800 dark:text-gray-200">0 GB</div>
+                            </div>
+                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-2">
+                                <div class="text-xs text-gray-500 dark:text-gray-400">Uploaded</div>
+                                <div id="networkTotalUp" class="text-sm sm:text-base font-semibold text-gray-800 dark:text-gray-200">0 GB</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Array and Disk Status -->
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-3 sm:gap-4">
+            <!-- Array Status -->
+            <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-3 sm:p-4">
+                <h2 class="text-base sm:text-lg font-semibold mb-2 sm:mb-3 text-gray-700 dark:text-gray-200">Array Status</h2>
+                <div class="grid grid-cols-2 gap-2 sm:gap-3">
+                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-2 sm:p-3">
+                        <div class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Status</div>
+                        <div id="arrayState" class="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-200">-</div>
+                    </div>
+                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-2 sm:p-3">
+                        <div class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Protected</div>
+                        <div id="arrayProtection" class="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-200">-</div>
+                    </div>
+                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-2 sm:p-3">
+                        <div class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Total Capacity</div>
+                        <div id="arrayCapacity" class="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-200">-</div>
+                    </div>
+                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-2 sm:p-3">
+                        <div class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Used Space</div>
+                        <div id="arrayUsed" class="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-200">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Disk Usage -->
+            <div class="lg:col-span-3 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-3 sm:p-4">
+                <h2 class="text-base sm:text-lg font-semibold mb-2 sm:mb-3 text-gray-700 dark:text-gray-200">Disk Usage</h2>
+                <div id="diskStats" class="overflow-y-auto max-h-[200px] pr-2 space-y-2 sm:space-y-3"></div>
             </div>
         </div>
     </div>
 
     <script>
         let cpuChart, memoryChart;
+        let lastNetworkStats = null;
 
-        function formatBytes(bytes) {
-            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-            if (bytes === 0) return '0 Byte';
-            const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
-            return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
+        // Theme toggle
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+        });
+
+        // Set initial theme
+        if (localStorage.theme === 'light') {
+            document.documentElement.classList.remove('dark');
+        }
+
+        function formatBytes(bytes, decimals = 2) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+        }
+
+        function formatBitrate(bytesPerSecond) {
+            return formatBytes(bytesPerSecond) + '/s';
         }
 
         function formatUptime(seconds) {
@@ -60,25 +220,68 @@
         }
 
         function initCharts() {
+            Chart.defaults.color = document.documentElement.classList.contains('dark') ? '#9ca3af' : '#4b5563';
+            
             // CPU Chart
             const cpuCtx = document.getElementById('cpuChart').getContext('2d');
             cpuChart = new Chart(cpuCtx, {
-                type: 'line',
+                type: 'bar',
                 data: {
                     labels: [],
                     datasets: [{
                         label: 'CPU Usage %',
                         data: [],
-                        borderColor: 'rgb(75, 192, 192)',
-                        tension: 0.1
+                        backgroundColor: document.documentElement.classList.contains('dark') ? '#0ea5e9' : '#0284c7',
+                        borderRadius: 4,
+                        barPercentage: 0.8,
+                        categoryPercentage: 0.9
                     }]
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 250
+                    },
+                    layout: {
+                        padding: {
+                            left: 0,
+                            right: 8
+                        }
+                    },
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.formattedValue}% Usage`;
+                                }
+                            }
+                        }
+                    },
                     scales: {
-                        y: {
+                        x: {
                             beginAtZero: true,
-                            max: 100
+                            max: 100,
+                            grid: {
+                                color: document.documentElement.classList.contains('dark') ? '#374151' : '#e5e7eb',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                maxTicksLimit: 5,
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        },
+                        y: {
+                            grid: {
+                                display: false,
+                                drawBorder: false
+                            }
                         }
                     }
                 }
@@ -89,14 +292,21 @@
             memoryChart = new Chart(memCtx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Used', 'Free'],
+                    labels: ['Used', 'Cache', 'Free'],
                     datasets: [{
-                        data: [0, 0],
-                        backgroundColor: ['rgb(255, 99, 132)', 'rgb(75, 192, 192)']
+                        data: [0, 0, 0],
+                        backgroundColor: ['#ef4444', '#f59e0b', '#10b981']
                     }]
                 },
                 options: {
-                    responsive: true
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    },
+                    cutout: '70%'
                 }
             });
         }
@@ -108,33 +318,103 @@
                     // Update system info
                     document.getElementById('hostname').textContent = data.hostname;
                     document.getElementById('platform').textContent = data.platform;
-                    document.getElementById('uptime').textContent = formatUptime(data.uptime / 1e9); // Convert nanoseconds to seconds
+                    document.getElementById('uptime').textContent = formatUptime(data.uptime / 1e9);
+                    document.getElementById('cpuCores').textContent = data.cpu_cores || 'N/A';
+                    document.getElementById('loadAvg').textContent = data.load_average ? 
+                        data.load_average.map(load => load.toFixed(2)).join(', ') : 'N/A';
 
-                    // Update CPU chart
-                    if (data.cpu_usage.length > 0) {
+                    // Update CPU stats
+                    if (data.cpu_usage && data.cpu_usage.length > 0) {
+                        const newLabels = data.cpu_usage.map((_, i) => `Core ${i + 1}`);
+                        const currentLabels = cpuChart.data.labels;
+                        
+                        // Only update if labels have changed
+                        if (!currentLabels || currentLabels.length !== newLabels.length || 
+                            !currentLabels.every((label, i) => label === newLabels[i])) {
+                            cpuChart.data.labels = newLabels;
+                        }
+                        
+                        // Update data
                         cpuChart.data.datasets[0].data = data.cpu_usage;
-                        cpuChart.data.labels = data.cpu_usage.map((_, i) => `CPU ${i}`);
-                        cpuChart.update();
+                        
+                        // Calculate total usage before chart update
+                        const totalUsage = data.cpu_usage.reduce((a, b) => a + b, 0) / data.cpu_usage.length;
+                        document.getElementById('cpuTotal').textContent = `${totalUsage.toFixed(1)}%`;
+                        
+                        // Update temperature if available
+                        document.getElementById('cpuTemp').textContent = data.cpu_temp ? 
+                            `${data.cpu_temp}°C` : 'N/A';
+                            
+                        // Only update chart if visible
+                        if (document.visibilityState === 'visible') {
+                            cpuChart.update('none'); // Use 'none' for no animation when updating
+                        }
                     }
 
-                    // Update memory chart
-                    const usedMem = data.memory_stats.total - data.memory_stats.available;
-                    memoryChart.data.datasets[0].data = [usedMem, data.memory_stats.available];
-                    memoryChart.update();
+                    // Update memory stats
+                    if (data.memory_stats) {
+                        const total = data.memory_stats.total;
+                        const available = data.memory_stats.available;
+                        const used = total - available;
+                        const cache = data.memory_stats.cached || 0;
+                        const free = available - cache;
+
+                        memoryChart.data.datasets[0].data = [used, cache, free];
+                        memoryChart.update();
+
+                        document.getElementById('memTotal').textContent = formatBytes(total);
+                        document.getElementById('memUsed').textContent = formatBytes(used);
+                        document.getElementById('memCache').textContent = formatBytes(cache);
+                    }
+
+                    // Update network stats
+                    if (data.network_stats) {
+                        if (lastNetworkStats) {
+                            const timeDiff = (data.network_stats.timestamp - lastNetworkStats.timestamp) / 1e9; // Convert to seconds
+                            const downRate = (data.network_stats.bytes_recv - lastNetworkStats.bytes_recv) / timeDiff;
+                            const upRate = (data.network_stats.bytes_sent - lastNetworkStats.bytes_sent) / timeDiff;
+
+                            document.getElementById('networkDown').textContent = formatBitrate(downRate);
+                            document.getElementById('networkUp').textContent = formatBitrate(upRate);
+                        }
+
+                        document.getElementById('networkTotalDown').textContent = formatBytes(data.network_stats.bytes_recv);
+                        document.getElementById('networkTotalUp').textContent = formatBytes(data.network_stats.bytes_sent);
+
+                        lastNetworkStats = data.network_stats;
+                    }
+
+                    // Update array status
+                    if (data.array_status) {
+                        document.getElementById('arrayState').textContent = data.array_status.state || '-';
+                        document.getElementById('arrayProtection').textContent = data.array_status.protection || '-';
+                        document.getElementById('arrayCapacity').textContent = 
+                            data.array_status.total_capacity ? formatBytes(data.array_status.total_capacity) : '-';
+                        document.getElementById('arrayUsed').textContent = 
+                            data.array_status.used_space ? formatBytes(data.array_status.used_space) : '-';
+                    }
 
                     // Update disk stats
-                    const diskStatsDiv = document.getElementById('diskStats');
-                    diskStatsDiv.innerHTML = data.disk_stats.map(disk => `
-                        <div class="mb-2">
-                            <p class="text-sm font-medium text-gray-700">${disk.path}</p>
-                            <div class="w-full bg-gray-200 rounded-full h-2.5">
-                                <div class="bg-blue-600 h-2.5 rounded-full" style="width: ${disk.used_percent}%"></div>
+                    if (data.disk_stats) {
+                        const diskStatsDiv = document.getElementById('diskStats');
+                        diskStatsDiv.innerHTML = data.disk_stats.map(disk => `
+                            <div class="flex items-center gap-2 sm:gap-3">
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex justify-between items-center mb-1">
+                                        <p class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 truncate">${disk.path}</p>
+                                        <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 ml-2">${disk.used_percent}%</p>
+                                    </div>
+                                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                                        <div class="bg-primary-600 h-1.5 rounded-full transition-all" 
+                                             style="width: ${disk.used_percent}%"></div>
+                                    </div>
+                                </div>
+                                <div class="text-right text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                                    ${formatBytes(disk.used)} / ${formatBytes(disk.total)}
+                                </div>
                             </div>
-                            <p class="text-xs text-gray-600 mt-1">
-                                ${formatBytes(disk.used)} used of ${formatBytes(disk.total)}
-                            </p>
-                        </div>
-                    `).join('');
+                        `).join('');
+                    }
                 })
                 .catch(error => console.error('Error fetching stats:', error));
         }
@@ -143,6 +423,27 @@
         initCharts();
         updateStats();
         setInterval(updateStats, 5000); // Update every 5 seconds
+
+        // Update chart colors when theme changes
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.attributeName === 'class') {
+                    const isDark = document.documentElement.classList.contains('dark');
+                    Chart.defaults.color = isDark ? '#9ca3af' : '#4b5563';
+                    
+                    // Update CPU chart colors
+                    if (cpuChart) {
+                        cpuChart.data.datasets[0].backgroundColor = isDark ? '#0ea5e9' : '#0284c7';
+                        cpuChart.options.scales.x.grid.color = isDark ? '#374151' : '#e5e7eb';
+                        cpuChart.update();
+                    }
+                }
+            });
+        });
+
+        observer.observe(document.documentElement, {
+            attributes: true
+        });
     </script>
 </body>
 </html> 
