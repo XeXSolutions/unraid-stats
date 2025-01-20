@@ -221,7 +221,7 @@
                 <!-- Array Status -->
                 <div class="card lg:col-span-2 rounded-lg shadow-lg p-3 sm:p-4">
                     <h2 class="text-base sm:text-lg font-semibold mb-2 sm:mb-3 text-gray-700 dark:text-gray-200">Array Status</h2>
-                    <div class="grid grid-cols-2 gap-2 sm:gap-3">
+                    <div class="grid grid-cols-2 gap-2 sm:gap-3 mb-4">
                         <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-2 sm:p-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                             <div class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Total Capacity</div>
                             <div id="arrayCapacity" class="stat-value text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-200">-</div>
@@ -229,6 +229,39 @@
                         <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-2 sm:p-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                             <div class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Used Space</div>
                             <div id="arrayUsed" class="stat-value text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-200">-</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Usage Breakdown -->
+                    <div class="mt-2">
+                        <h3 class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Usage Breakdown</h3>
+                        <div class="space-y-3">
+                            <!-- Array Usage Bar -->
+                            <div>
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="text-xs text-gray-600 dark:text-gray-400">Array Usage</span>
+                                    <span id="arrayUsagePercent" class="text-xs font-medium text-gray-700 dark:text-gray-300">-%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                                    <div id="arrayUsageBar" class="bg-primary-500 dark:bg-primary-600 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Free Space -->
+                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-2">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs text-gray-600 dark:text-gray-400">Free Space</span>
+                                    <span id="arrayFree" class="text-xs font-medium text-gray-700 dark:text-gray-300">-</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Protection Status -->
+                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-2">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs text-gray-600 dark:text-gray-400">Protection Status</span>
+                                    <span id="arrayProtection" class="text-xs font-medium text-gray-700 dark:text-gray-300">-</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -482,6 +515,20 @@
                             data.array_status.total_capacity ? formatBytes(data.array_status.total_capacity) : '-';
                         document.getElementById('arrayUsed').textContent = 
                             data.array_status.used_space ? formatBytes(data.array_status.used_space) : '-';
+                        
+                        // Calculate and update array usage percentage
+                        if (data.array_status.total_capacity && data.array_status.used_space) {
+                            const usagePercent = (data.array_status.used_space / data.array_status.total_capacity) * 100;
+                            document.getElementById('arrayUsagePercent').textContent = `${usagePercent.toFixed(1)}%`;
+                            document.getElementById('arrayUsageBar').style.width = `${usagePercent}%`;
+                            
+                            // Calculate and update free space
+                            const freeSpace = data.array_status.total_capacity - data.array_status.used_space;
+                            document.getElementById('arrayFree').textContent = formatBytes(freeSpace);
+                        }
+                        
+                        // Update protection status
+                        document.getElementById('arrayProtection').textContent = data.array_status.protection || '-';
                     }
 
                     // Update disk stats
