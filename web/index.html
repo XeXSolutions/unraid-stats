@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unraid Server Stats</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold mb-8 text-gray-800">Unraid Server Statistics</h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <!-- System Info Card -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-semibold mb-4 text-gray-700">System Info</h2>
+                <div class="space-y-2">
+                    <p class="text-gray-600">Hostname: <span id="hostname" class="font-medium text-gray-800"></span></p>
+                    <p class="text-gray-600">Platform: <span id="platform" class="font-medium text-gray-800"></span></p>
+                    <p class="text-gray-600">Uptime: <span id="uptime" class="font-medium text-gray-800"></span></p>
+                </div>
+            </div>
+
+            <!-- CPU Usage Card -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-semibold mb-4 text-gray-700">CPU Usage</h2>
+                <canvas id="cpuChart"></canvas>
+            </div>
+
+            <!-- Memory Usage Card -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-semibold mb-4 text-gray-700">Memory Usage</h2>
+                <canvas id="memoryChart"></canvas>
+            </div>
+
+            <!-- Disk Usage Card -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-semibold mb-4 text-gray-700">Disk Usage</h2>
+                <div id="diskStats" class="space-y-4"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let cpuChart, memoryChart;
+
+        function formatBytes(bytes) {
+            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+            if (bytes === 0) return '0 Byte';
+            const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+            return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
+        }
+
+        function formatUptime(seconds) {
+            const days = Math.floor(seconds / (24 * 60 * 60));
+            const hours = Math.floor((seconds % (24 * 60 * 60)) / (60 * 60));
+            const minutes = Math.floor((seconds % (60 * 60)) / 60);
+            return `${days}d ${hours}h ${minutes}m`;
+        }
+
+        function initCharts() {
+            // CPU Chart
+            const cpuCtx = document.getElementById('cpuChart').getContext('2d');
+            cpuChart = new Chart(cpuCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'CPU Usage %',
+                        data: [],
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+
+            // Memory Chart
+            const memCtx = document.getElementById('memoryChart').getContext('2d');
+            memoryChart = new Chart(memCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Used', 'Free'],
+                    datasets: [{
+                        data: [0, 0],
+                        backgroundColor: ['rgb(255, 99, 132)', 'rgb(75, 192, 192)']
+                    }]
+                },
+                options: {
+                    responsive: true
+                }
+            });
+        }
+
+        function updateStats() {
+            fetch('/api/stats')
+                .then(response => response.json())
+                .then(data => {
+                    // Update system info
+                    document.getElementById('hostname').textContent = data.hostname;
+                    document.getElementById('platform').textContent = data.platform;
+                    document.getElementById('uptime').textContent = formatUptime(data.uptime / 1e9); // Convert nanoseconds to seconds
+
+                    // Update CPU chart
+                    if (data.cpu_usage.length > 0) {
+                        cpuChart.data.datasets[0].data = data.cpu_usage;
+                        cpuChart.data.labels = data.cpu_usage.map((_, i) => `CPU ${i}`);
+                        cpuChart.update();
+                    }
+
+                    // Update memory chart
+                    const usedMem = data.memory_stats.total - data.memory_stats.available;
+                    memoryChart.data.datasets[0].data = [usedMem, data.memory_stats.available];
+                    memoryChart.update();
+
+                    // Update disk stats
+                    const diskStatsDiv = document.getElementById('diskStats');
+                    diskStatsDiv.innerHTML = data.disk_stats.map(disk => `
+                        <div class="mb-2">
+                            <p class="text-sm font-medium text-gray-700">${disk.path}</p>
+                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div class="bg-blue-600 h-2.5 rounded-full" style="width: ${disk.used_percent}%"></div>
+                            </div>
+                            <p class="text-xs text-gray-600 mt-1">
+                                ${formatBytes(disk.used)} used of ${formatBytes(disk.total)}
+                            </p>
+                        </div>
+                    `).join('');
+                })
+                .catch(error => console.error('Error fetching stats:', error));
+        }
+
+        // Initialize charts and start updating stats
+        initCharts();
+        updateStats();
+        setInterval(updateStats, 5000); // Update every 5 seconds
+    </script>
+</body>
+</html> 
