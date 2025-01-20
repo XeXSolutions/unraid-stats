@@ -168,19 +168,22 @@ func getSystemStats() (*SystemStats, error) {
 	platform := "Unraid" // Default to Unraid
 
 	// Read var.ini for server name and version
-	if varData, err := ioutil.ReadFile("/var/local/emhttp/var.ini"); err == nil {
+	if varData, err := ioutil.ReadFile("/host/var/local/emhttp/var.ini"); err == nil {
 		lines := strings.Split(string(varData), "\n")
 		for _, line := range lines {
 			if strings.HasPrefix(line, "NAME=") {
 				hostname = strings.Trim(strings.TrimPrefix(line, "NAME="), "\"")
+				log.Printf("Found server name: %s", hostname)
 			} else if strings.HasPrefix(line, "version=") {
 				version := strings.Trim(strings.TrimPrefix(line, "version="), "\"")
 				if version != "" {
 					platform = fmt.Sprintf("Unraid %s", version)
+					log.Printf("Found Unraid version: %s", version)
 				}
 			}
 		}
 	} else {
+		log.Printf("Could not read var.ini: %v, falling back to system hostname", err)
 		// Fallback to system hostname
 		var err error
 		hostname, err = os.Hostname()
