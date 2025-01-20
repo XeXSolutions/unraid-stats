@@ -31,7 +31,7 @@
     </script>
 </head>
 <body class="dark:bg-gray-900 bg-gray-50 transition-colors duration-200">
-    <div class="h-screen overflow-y-auto p-2 sm:p-4">
+    <div class="h-screen overflow-y-auto pb-12 p-2 sm:p-4">
         <!-- Header -->
         <div class="flex justify-between items-center mb-4 px-2">
             <h1 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white truncate">Unraid Server Statistics</h1>
@@ -182,6 +182,14 @@
             </div>
         </div>
     </div>
+
+    <!-- Footer -->
+    <footer class="fixed bottom-0 left-0 right-0 p-2 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 text-center text-xs text-gray-600 dark:text-gray-400">
+        <div class="container mx-auto">
+            <span>© 2025 All rights reserved. | </span>
+            <a href="https://github.com/XeXSolutions" target="_blank" rel="noopener noreferrer" class="text-primary-600 dark:text-primary-400 hover:underline">XeXSolutions</a>
+        </div>
+    </footer>
 
     <script>
         let cpuChart, memoryChart;

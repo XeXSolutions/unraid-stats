@@ -5,9 +5,14 @@ services:
     image: ghcr.io/xexsolutions/unraid-stats:latest
     container_name: unraid-stats
     ports:
-      - "8080:8080"
+      - "8085:8085"
     restart: unless-stopped
     privileged: true
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
+      - /var/local/emhttp:/host/var/local/emhttp:ro
+      - /var/run/mdcmd.socket:/var/run/mdcmd.socket:ro
+      - /var/run/mdstat:/var/run/mdstat:ro
+      - /var/local/emhttp/disks.ini:/host/var/local/emhttp/disks.ini:ro
+      - /dev/disk/by-id:/host/dev/disk/by-id:ro

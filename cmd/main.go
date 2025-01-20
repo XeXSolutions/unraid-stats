@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -62,75 +61,90 @@ type SystemStats struct {
 }
 
 func readUnraidConfig() (*ArrayStatus, []DiskInfo, error) {
-	// Read array status from /proc/mdcmd
-	mdcmdPath := "/host/proc/mdcmd"
-	if _, err := os.Stat(mdcmdPath); os.IsNotExist(err) {
-		mdcmdPath = "/proc/mdcmd" // Fallback for testing
-	}
-
-	mdcmdData, err := ioutil.ReadFile(mdcmdPath)
-	if err != nil {
-		return nil, nil, err
-	}
-
 	arrayStatus := &ArrayStatus{
 		State: "Unknown",
 	}
 
-	// Parse mdcmd output for array status
-	lines := strings.Split(string(mdcmdData), "\n")
-	for _, line := range lines {
-		if strings.HasPrefix(line, "mdState=") {
-			arrayStatus.State = strings.TrimPrefix(line, "mdState=")
-		} else if strings.HasPrefix(line, "mdNumProtected=") {
-			protected, _ := strconv.Atoi(strings.TrimPrefix(line, "mdNumProtected="))
-			if protected > 0 {
-				arrayStatus.Protection = "Protected"
-			} else {
-				arrayStatus.Protection = "Not Protected"
-			}
+	// Read array status from mdstat
+	mdstatPath := "/host/var/run/mdstat"
+	if _, err := os.Stat(mdstatPath); os.IsNotExist(err) {
+		mdstatPath = "/var/run/mdstat" // Fallback for testing
+	}
+
+	mdstatData, err := ioutil.ReadFile(mdstatPath)
+	if err == nil {
+		mdstatContent := string(mdstatData)
+		if strings.Contains(mdstatContent, "active") {
+			arrayStatus.State = "Started"
+			arrayStatus.Protection = "Protected"
+		} else if strings.Contains(mdstatContent, "inactive") {
+			arrayStatus.State = "Stopped"
+			arrayStatus.Protection = "Not Protected"
 		}
 	}
 
-	// Read disk information
-	var diskInfos []DiskInfo
-
-	// Read array disks from /dev/disk/by-id
-	disksPath := "/host/dev/disk/by-id"
-	if _, err := os.Stat(disksPath); os.IsNotExist(err) {
-		disksPath = "/dev/disk/by-id" // Fallback for testing
+	// Read disks.ini for disk information
+	disksIniPath := "/host/var/local/emhttp/disks.ini"
+	if _, err := os.Stat(disksIniPath); os.IsNotExist(err) {
+		disksIniPath = "/var/local/emhttp/disks.ini" // Fallback for testing
 	}
 
-	files, err := ioutil.ReadDir(disksPath)
+	disksIniData, err := ioutil.ReadFile(disksIniPath)
 	if err != nil {
-		return arrayStatus, nil, err
+		log.Printf("Warning: Could not read disks.ini: %v", err)
 	}
 
-	for _, file := range files {
-		if strings.HasPrefix(file.Name(), "ata-") || strings.HasPrefix(file.Name(), "scsi-") {
-			diskPath := filepath.Join(disksPath, file.Name())
-			realPath, err := filepath.EvalSymlinks(diskPath)
-			if err != nil {
+	var diskInfos []DiskInfo
+	if err == nil {
+		lines := strings.Split(string(disksIniData), "\n")
+		var currentDisk string
+		diskMap := make(map[string]map[string]string)
+
+		for _, line := range lines {
+			line = strings.TrimSpace(line)
+			if line == "" {
 				continue
 			}
 
-			usage, err := disk.Usage(realPath)
-			if err != nil {
-				continue
+			if strings.HasPrefix(line, "[") && strings.HasSuffix(line, "]") {
+				currentDisk = strings.Trim(line, "[]")
+				diskMap[currentDisk] = make(map[string]string)
+			} else if currentDisk != "" && strings.Contains(line, "=") {
+				parts := strings.SplitN(line, "=", 2)
+				if len(parts) == 2 {
+					key := strings.TrimSpace(parts[0])
+					value := strings.TrimSpace(parts[1])
+					diskMap[currentDisk][key] = value
+				}
+			}
+		}
+
+		// Process disk information
+		for diskName, diskData := range diskMap {
+			if diskName == "parity" || diskName == "parity2" {
+				continue // Skip parity disks for now as they're handled differently
 			}
 
 			diskType := "data"
-			if strings.Contains(file.Name(), "parity") {
-				diskType = "parity"
-				arrayStatus.ParitySize = usage.Total
-			} else if strings.Contains(file.Name(), "cache") {
+			if strings.HasPrefix(diskName, "cache") {
 				diskType = "cache"
-				arrayStatus.CacheSize = usage.Total
+			}
+
+			devicePath := diskData["device"]
+			if devicePath == "" {
+				continue
+			}
+
+			// Get disk usage information
+			usage, err := disk.Usage(devicePath)
+			if err != nil {
+				log.Printf("Warning: Could not get disk usage for %s: %v", devicePath, err)
+				continue
 			}
 
 			diskInfo := DiskInfo{
-				Path:        realPath,
-				Name:        file.Name(),
+				Path:        devicePath,
+				Name:        diskName,
 				Total:       usage.Total,
 				Used:        usage.Used,
 				Free:        usage.Free,
@@ -138,11 +152,42 @@ func readUnraidConfig() (*ArrayStatus, []DiskInfo, error) {
 				Type:        diskType,
 			}
 
-			diskInfos = append(diskInfos, diskInfo)
-
 			if diskType == "data" {
 				arrayStatus.TotalCapacity += usage.Total
 				arrayStatus.UsedSpace += usage.Used
+			} else if diskType == "cache" {
+				arrayStatus.CacheSize += usage.Total
+			}
+
+			diskInfos = append(diskInfos, diskInfo)
+		}
+
+		// Add parity disks
+		parityDevices := []string{"parity", "parity2"}
+		for _, parityName := range parityDevices {
+			if parityData, exists := diskMap[parityName]; exists {
+				devicePath := parityData["device"]
+				if devicePath == "" {
+					continue
+				}
+
+				usage, err := disk.Usage(devicePath)
+				if err != nil {
+					continue
+				}
+
+				diskInfo := DiskInfo{
+					Path:        devicePath,
+					Name:        parityName,
+					Total:       usage.Total,
+					Used:        usage.Used,
+					Free:        usage.Free,
+					UsedPercent: usage.UsedPercent,
+					Type:        "parity",
+				}
+
+				arrayStatus.ParitySize += usage.Total
+				diskInfos = append(diskInfos, diskInfo)
 			}
 		}
 	}
@@ -184,7 +229,11 @@ func getSystemStats() (*SystemStats, error) {
 	}
 	if counters, err := net.IOCounters(true); err == nil {
 		for _, counter := range counters {
-			if !strings.HasPrefix(counter.Name, "lo") { // Skip loopback
+			// Skip loopback and docker interfaces
+			if !strings.HasPrefix(counter.Name, "lo") &&
+				!strings.HasPrefix(counter.Name, "docker") &&
+				!strings.HasPrefix(counter.Name, "br-") &&
+				!strings.HasPrefix(counter.Name, "veth") {
 				netStats.BytesSent += counter.BytesSent
 				netStats.BytesRecv += counter.BytesRecv
 				netStats.Interfaces = append(netStats.Interfaces, counter.Name)
