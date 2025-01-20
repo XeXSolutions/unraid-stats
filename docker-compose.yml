@@ -9,11 +9,11 @@ services:
     restart: unless-stopped
     privileged: true
     volumes:
-      - /proc:/host/proc:ro
-      - /sys:/host/sys:ro
-      - /boot/config:/host/boot/config:ro
-      - /var/local/emhttp:/host/var/local/emhttp:ro
-      - /mnt/user:/host/mnt/user:ro
-      - /mnt/disk*:/host/mnt/disk*:ro
-      - /mnt/cache:/host/mnt/cache:ro
-      - /mnt/disks:/host/mnt/disks:ro
+      - /proc:/host/proc:ro,rslave
+      - /sys:/host/sys:ro,rslave
+      - /var/local/emhttp:/host/var/local/emhttp:ro,rslave
+      - /var/run/mdcmd.socket:/var/run/mdcmd.socket:ro
+      - /var/run/mdstat:/var/run/mdstat:ro
+      - /var/local/emhttp/disks.ini:/host/var/local/emhttp/disks.ini:ro,rslave
+      - /dev/disk/by-id:/host/dev/disk/by-id:ro
+      - /mnt:/host/mnt:ro,rslave

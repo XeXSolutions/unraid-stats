@@ -69,7 +69,7 @@ func readUnraidConfig() (*ArrayStatus, []DiskInfo, error) {
 	var diskInfos []DiskInfo
 
 	// Check array status from mdstat
-	mdstatPath := "/host/proc/mdstat"
+	mdstatPath := "/var/run/mdstat"
 	if mdstatData, err := ioutil.ReadFile(mdstatPath); err == nil {
 		mdstatContent := string(mdstatData)
 		log.Printf("Read mdstat content: %s", mdstatContent)
@@ -80,61 +80,79 @@ func readUnraidConfig() (*ArrayStatus, []DiskInfo, error) {
 		}
 	} else {
 		log.Printf("Could not read mdstat: %v", err)
-	}
-
-	// Read array disks
-	diskPaths := []struct {
-		path string
-		typ  string
-	}{
-		{"/host/mnt/disk1", "data"},
-		{"/host/mnt/disk2", "data"},
-		{"/host/mnt/disk3", "data"},
-		{"/host/mnt/disk4", "data"},
-		{"/host/mnt/disk5", "data"},
-		{"/host/mnt/disk6", "data"},
-		{"/host/mnt/disk7", "data"},
-		{"/host/mnt/disk8", "data"},
-		{"/host/mnt/cache", "cache"},
-		{"/host/mnt/user", "user"},
-	}
-
-	log.Printf("Checking disk paths...")
-	for _, diskPath := range diskPaths {
-		if _, err := os.Stat(diskPath.path); err == nil {
-			log.Printf("Found disk at %s", diskPath.path)
-			usage, err := disk.Usage(diskPath.path)
-			if err != nil {
-				log.Printf("Warning: Could not get disk usage for %s: %v", diskPath.path, err)
-				continue
+		// Try alternate path
+		mdstatPath = "/host/proc/mdstat"
+		if mdstatData, err := ioutil.ReadFile(mdstatPath); err == nil {
+			mdstatContent := string(mdstatData)
+			log.Printf("Read mdstat content from alternate path: %s", mdstatContent)
+			if strings.Contains(mdstatContent, "md0") {
+				arrayStatus.State = "Started"
+				arrayStatus.Protection = "Protected"
+				log.Printf("Array detected as Started and Protected")
 			}
-
-			// Get the actual disk name from the path
-			diskName := strings.TrimPrefix(diskPath.path, "/host/mnt/")
-
-			diskInfo := DiskInfo{
-				Path:        diskPath.path,
-				Name:        diskName,
-				Total:       usage.Total,
-				Used:        usage.Used,
-				Free:        usage.Free,
-				UsedPercent: usage.UsedPercent,
-				Type:        diskPath.typ,
-			}
-
-			if diskPath.typ == "data" {
-				arrayStatus.TotalCapacity += usage.Total
-				arrayStatus.UsedSpace += usage.Used
-				log.Printf("Added data disk %s: total=%d, used=%d", diskName, usage.Total, usage.Used)
-			} else if diskPath.typ == "cache" {
-				arrayStatus.CacheSize += usage.Total
-				log.Printf("Added cache disk %s: total=%d", diskName, usage.Total)
-			}
-
-			diskInfos = append(diskInfos, diskInfo)
 		} else {
-			log.Printf("Disk not found at %s: %v", diskPath.path, err)
+			log.Printf("Could not read mdstat from alternate path: %v", err)
 		}
+	}
+
+	// Read array disks from /mnt directly
+	basePath := "/host/mnt"
+	log.Printf("Checking disk paths in %s...", basePath)
+
+	// Read directory contents
+	entries, err := os.ReadDir(basePath)
+	if err != nil {
+		log.Printf("Error reading directory %s: %v", basePath, err)
+		return arrayStatus, diskInfos, nil
+	}
+
+	for _, entry := range entries {
+		if !entry.IsDir() {
+			continue
+		}
+
+		name := entry.Name()
+		path := fmt.Sprintf("%s/%s", basePath, name)
+		var diskType string
+
+		switch {
+		case strings.HasPrefix(name, "disk"):
+			diskType = "data"
+		case name == "cache":
+			diskType = "cache"
+		case name == "user":
+			diskType = "user"
+		default:
+			continue
+		}
+
+		log.Printf("Found disk directory: %s (type: %s)", path, diskType)
+		usage, err := disk.Usage(path)
+		if err != nil {
+			log.Printf("Warning: Could not get disk usage for %s: %v", path, err)
+			continue
+		}
+
+		diskInfo := DiskInfo{
+			Path:        path,
+			Name:        name,
+			Total:       usage.Total,
+			Used:        usage.Used,
+			Free:        usage.Free,
+			UsedPercent: usage.UsedPercent,
+			Type:        diskType,
+		}
+
+		if diskType == "data" {
+			arrayStatus.TotalCapacity += usage.Total
+			arrayStatus.UsedSpace += usage.Used
+			log.Printf("Added data disk %s: total=%d, used=%d", name, usage.Total, usage.Used)
+		} else if diskType == "cache" {
+			arrayStatus.CacheSize += usage.Total
+			log.Printf("Added cache disk %s: total=%d", name, usage.Total)
+		}
+
+		diskInfos = append(diskInfos, diskInfo)
 	}
 
 	log.Printf("Found %d disks total", len(diskInfos))
