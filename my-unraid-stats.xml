@@ -68,9 +68,19 @@
       <Mode>ro</Mode>
     </Volume>
     <Volume>
+      <HostDir>/var/run/mdcmd.socket</HostDir>
+      <ContainerDir>/var/run/mdcmd.socket</ContainerDir>
+      <Mode>ro</Mode>
+    </Volume>
+    <Volume>
       <HostDir>/mnt</HostDir>
       <ContainerDir>/host/mnt</ContainerDir>
       <Mode>ro,rslave</Mode>
+    </Volume>
+    <Volume>
+      <HostDir>/dev/disk/by-id</HostDir>
+      <ContainerDir>/host/dev/disk/by-id</ContainerDir>
+      <Mode>ro</Mode>
     </Volume>
   </Data>
   <Environment/>
