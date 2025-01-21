@@ -2,35 +2,78 @@
 <Container version="2">
   <Name>unraid-stats</Name>
   <Repository>ghcr.io/xexsolutions/unraid-stats:latest</Repository>
-  <Registry>ghcr.io</Registry>
+  <Registry>https://github.com/XeXSolutions/unraid-stats</Registry>
   <Network>bridge</Network>
+  <MyIP></MyIP>
+  <Shell>sh</Shell>
   <Privileged>true</Privileged>
-  <Support>https://github.com/xexsolutions/unraid-stats/issues</Support>
-  <Project>https://github.com/xexsolutions/unraid-stats</Project>
-  <Overview>A simple and elegant system statistics viewer for Unraid servers. Monitor CPU, memory, network, and array status in real-time with a modern, responsive interface.</Overview>
-  <Category>Tools: System:Status</Category>
+  <Support>https://github.com/XeXSolutions/unraid-stats/issues</Support>
+  <Project>https://github.com/XeXSolutions/unraid-stats</Project>
+  <Overview>A modern, real-time system monitoring dashboard for Unraid servers. Features include CPU, memory, network monitoring, and array status tracking with a clean, responsive interface.</Overview>
+  <Category>Tools: System:Monitoring Status:Stable</Category>
   <WebUI>http://[IP]:[PORT:8085]/</WebUI>
-  <TemplateURL>https://raw.githubusercontent.com/xexsolutions/unraid-stats/master/unraid-stats.xml</TemplateURL>
-  <Icon>https://raw.githubusercontent.com/xexsolutions/unraid-stats/master/icon.png</Icon>
-  <ExtraParams>--privileged</ExtraParams>
-  <Config Name="WebUI Port" Target="8085" Default="8085" Mode="tcp" Description="Web UI port" Type="Port" Display="always" Required="true" Mask="false">8085</Config>
-  <Config Name="Host Path 1" Target="/host/proc" Default="/proc" Mode="ro" Description="Proc path" Type="Path" Display="advanced" Required="true" Mask="false">/proc</Config>
-  <Config Name="Host Path 2" Target="/host/sys" Default="/sys" Mode="ro" Description="Sys path" Type="Path" Display="advanced" Required="true" Mask="false">/sys</Config>
-  <Config Name="Host Path 3" Target="/host/var/local/emhttp" Default="/var/local/emhttp" Mode="ro" Description="Emhttp path" Type="Path" Display="advanced" Required="true" Mask="false">/var/local/emhttp</Config>
-  <Config Name="Host Path 4" Target="/var/run/mdcmd.socket" Default="/var/run/mdcmd.socket" Mode="ro" Description="MDCmd socket" Type="Path" Display="advanced" Required="true" Mask="false">/var/run/mdcmd.socket</Config>
-  <Config Name="Host Path 5" Target="/var/run/mdstat" Default="/var/run/mdstat" Mode="ro" Description="MDStat path" Type="Path" Display="advanced" Required="true" Mask="false">/var/run/mdstat</Config>
-  <Config Name="Host Path 6" Target="/host/mnt" Default="/mnt" Mode="ro" Description="Mount path" Type="Path" Display="advanced" Required="true" Mask="false">/mnt</Config>
-  <DonateText>If you appreciate this app, please consider donating to support its development.</DonateText>
-  <DonateLink>https://github.com/sponsors/xexsolutions</DonateLink>
-  <Description>Monitor your Unraid server with a modern, responsive web interface. Features include:
-  * Real-time CPU, memory, and network statistics
-  * Array status and disk usage monitoring
-  * Dark/light mode support
-  * Mobile-friendly design
-  * Easy-to-read charts and graphs</Description>
-  <Labels>
-    <Label Name="org.opencontainers.image.source" Value="https://github.com/xexsolutions/unraid-stats"/>
-    <Label Name="org.opencontainers.image.description" Value="Unraid System Statistics Viewer"/>
-    <Label Name="org.opencontainers.image.licenses" Value="MIT"/>
-  </Labels>
+  <TemplateURL>https://raw.githubusercontent.com/XeXSolutions/unraid-stats/main/my-unraid-stats.xml</TemplateURL>
+  <Icon>https://raw.githubusercontent.com/XeXSolutions/unraid-stats/main/images/logo.png</Icon>
+  <ExtraParams></ExtraParams>
+  <PostArgs></PostArgs>
+  <CPUset></CPUset>
+  <DateInstalled></DateInstalled>
+  <DonateText>If you find this app useful, please consider supporting its development.</DonateText>
+  <DonateLink>https://github.com/sponsors/XeXSolutions</DonateLink>
+  <Description>A lightweight system monitoring dashboard designed specifically for Unraid servers. Features include:&#xD;
+    &#xD;
+    [b]Key Features:[/b]&#xD;
+    - Real-time CPU usage monitoring per core&#xD;
+    - Memory usage tracking with cache statistics&#xD;
+    - Network transfer rates and total usage&#xD;
+    - Array status and disk usage monitoring&#xD;
+    - Dark/Light mode support&#xD;
+    - Mobile-friendly interface&#xD;
+    - Configurable refresh rates&#xD;
+    &#xD;
+    [b]Container Features:[/b]&#xD;
+    - Lightweight Alpine-based image&#xD;
+    - Automatic updates via GHCR&#xD;
+    - Easy installation and configuration&#xD;
+    </Description>
+  <Networking>
+    <Mode>bridge</Mode>
+    <Publish>
+      <Port>
+        <HostPort>8085</HostPort>
+        <ContainerPort>8085</ContainerPort>
+        <Protocol>tcp</Protocol>
+      </Port>
+    </Publish>
+  </Networking>
+  <Data>
+    <Volume>
+      <HostDir>/proc</HostDir>
+      <ContainerDir>/host/proc</ContainerDir>
+      <Mode>ro,rslave</Mode>
+    </Volume>
+    <Volume>
+      <HostDir>/sys</HostDir>
+      <ContainerDir>/host/sys</ContainerDir>
+      <Mode>ro,rslave</Mode>
+    </Volume>
+    <Volume>
+      <HostDir>/var/local/emhttp</HostDir>
+      <ContainerDir>/host/var/local/emhttp</ContainerDir>
+      <Mode>ro,rslave</Mode>
+    </Volume>
+    <Volume>
+      <HostDir>/var/run/mdstat</HostDir>
+      <ContainerDir>/var/run/mdstat</ContainerDir>
+      <Mode>ro</Mode>
+    </Volume>
+    <Volume>
+      <HostDir>/mnt</HostDir>
+      <ContainerDir>/host/mnt</ContainerDir>
+      <Mode>ro,rslave</Mode>
+    </Volume>
+  </Data>
+  <Environment/>
+  <Labels/>
+  <Config Name="WebUI Port" Target="8085" Default="8085" Mode="tcp" Description="Web Interface Port" Type="Port" Display="always" Required="true" Mask="false">8085</Config>
 </Container> 
