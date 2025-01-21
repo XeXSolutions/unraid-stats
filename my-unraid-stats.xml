@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <Container version="2">
   <Name>unraid-stats</Name>
-  <Repository>ghcr.io/xexsolutions/unraid-stats:latest</Repository>
-  <Registry>https://github.com/XeXSolutions/unraid-stats</Registry>
+  <Repository>xexsolutions/unraid-stats:latest</Repository>
+  <Registry>https://hub.docker.com/r/xexsolutions/unraid-stats</Registry>
   <Network>bridge</Network>
   <MyIP></MyIP>
   <Shell>sh</Shell>
