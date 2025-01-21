@@ -1,10 +1,11 @@
 # Build stage
-FROM golang:1.21-alpine AS builder
+FROM golang:1.21-alpine3.19 AS builder
 
 WORKDIR /app
 
 # Install build dependencies
-RUN apk add --no-cache git
+RUN apk update && \
+    apk add --no-cache git
 
 # Copy go mod files first for better caching
 COPY go.mod go.sum ./
@@ -19,7 +20,7 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o unraid-stats ./cmd/main.go
 
 # Final stage
-FROM alpine:latest
+FROM alpine:3.19
 
 LABEL org.opencontainers.image.source="https://github.com/XeXSolutions/unraid-stats"
 LABEL org.opencontainers.image.description="Unraid System Statistics Viewer"
