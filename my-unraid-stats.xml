@@ -86,4 +86,11 @@
   <Environment/>
   <Labels/>
   <Config Name="WebUI Port" Target="8085" Default="8085" Mode="tcp" Description="Web Interface Port" Type="Port" Display="always" Required="true" Mask="false">8085</Config>
+  <Config Name="Host Path 1" Target="/host/proc" Default="/proc" Mode="ro,rslave" Description="System information path" Type="Path" Display="advanced" Required="true" Mask="false">/proc</Config>
+  <Config Name="Host Path 2" Target="/host/sys" Default="/sys" Mode="ro,rslave" Description="System information path" Type="Path" Display="advanced" Required="true" Mask="false">/sys</Config>
+  <Config Name="Host Path 3" Target="/host/var/local/emhttp" Default="/var/local/emhttp" Mode="ro,rslave" Description="Unraid configuration path" Type="Path" Display="advanced" Required="true" Mask="false">/var/local/emhttp</Config>
+  <Config Name="Host Path 4" Target="/var/run/mdstat" Default="/var/run/mdstat" Mode="ro" Description="Array status path" Type="Path" Display="advanced" Required="true" Mask="false">/var/run/mdstat</Config>
+  <Config Name="Host Path 5" Target="/var/run/mdcmd.socket" Default="/var/run/mdcmd.socket" Mode="ro" Description="Array command socket" Type="Path" Display="advanced" Required="true" Mask="false">/var/run/mdcmd.socket</Config>
+  <Config Name="Host Path 6" Target="/host/mnt" Default="/mnt" Mode="ro,rslave" Description="Mount points path" Type="Path" Display="advanced" Required="true" Mask="false">/mnt</Config>
+  <Config Name="Host Path 7" Target="/host/dev/disk/by-id" Default="/dev/disk/by-id" Mode="ro" Description="Disk identification path" Type="Path" Display="advanced" Required="true" Mask="false">/dev/disk/by-id</Config>
 </Container> 
